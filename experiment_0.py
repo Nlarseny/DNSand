@@ -106,3 +106,48 @@ for rrset in response.authority:
         if rrset.rdtype == dns.rdatatype.SOA:
             print(int(rrset[0].serial))
 
+
+
+# # old attempt of time delta stuff
+# def timer_call(target, target_time, hour_delta = 0, minute_delta = 0, second_delta = 1):
+#     # target_time = datetime.today()
+    
+
+#     edited_sec = target_time.second + second_delta
+#     if edited_sec >= 60:
+#         add_min = math.floor(edited_sec / 60)
+#         edited_sec = edited_sec % 60
+#         minute_delta += add_min
+
+#     # x = target_time.replace(hour = x.hour + hour_delta, minute = x.minute + minute_delta, second = edited_sec, microsecond = 0)
+#     #delta_t = y - target_time
+
+
+
+#     x = datetime.now().time()
+#     print("x", type(x))
+
+#     target_datetime = datetime.combine(datetime.now(), target_time)
+#     x_datetime = datetime.combine(datetime.now(), x)
+
+#     delta_t = target_datetime - x_datetime
+
+#     print("y day", target_time.day)
+#     print("delta_t", delta_t)
+
+#     # secs = delta_t.total_seconds()
+    
+#     if 11 < 10:
+#         print("success")
+#         t = Timer(secs, get_serial, [target]) # timer is a thread subclass
+#         t.start()
+
+
+# def stamp_parser(stamp):
+#     # 22:17:44.262345
+#     split_results = stamp.split(":")
+#     hour = split_results[0]
+#     minute = split_results[1]
+#     second = split_results[2]
+
+#     return int(hour), int(minute), int(math.floor(float(second)))
