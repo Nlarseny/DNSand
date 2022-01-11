@@ -141,11 +141,14 @@ def main(argv):
 
     # FIX: needs to be updated every iteration
     iter = 0
-    target = "example.com" + str(iter)
+    target_address = "example.com" + str(iter)
     # previous_serial = get_serial(target, "8.8.8.8")
     
 
     while 1:
+        iter += 1
+        target_address = "example.com" + str(iter)
+
         # where we need to feed difference between times
         current_time = createTimeStamp()
         
@@ -160,6 +163,9 @@ def main(argv):
 
         timer_list = TIME_LIST
         for x in timer_list:
+            iter += 1
+            target_address = "example.com" + str(iter)
+
             result_check = checkIfTime(current_time, target_time, x, 0)
             while not result_check:
                 time.sleep(1)
@@ -169,7 +175,7 @@ def main(argv):
                 current_time = createTimeStamp()
 
             if result_check:
-                current_serial = get_serial(target, "127.0.0.1") # double check this is what I need to feed in
+                current_serial = get_serial(target_address, "127.0.0.1") # double check this is what I need to feed in
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
 
                 with open('somefile.txt', 'a') as the_file:
@@ -177,6 +183,9 @@ def main(argv):
 
 
         for x in reversed(timer_list):
+            iter += 1
+            target_address = "example.com" + str(iter)
+
             result_check = negCheckIfTime(current_time, target_time, -1 * x)
             while not result_check:
                 time.sleep(1)
@@ -186,7 +195,7 @@ def main(argv):
                 current_time = createTimeStamp()
 
             if result_check:
-                current_serial = get_serial(target, "8.8.8.8")
+                current_serial = get_serial(target_address, "127.0.0.1")
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
                 with open('somefile.txt', 'a') as the_file:
                     the_file.write(results)
