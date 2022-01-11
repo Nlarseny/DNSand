@@ -139,6 +139,7 @@ def main(argv):
     list_of_times = get_list_times(args[0])
     
 
+    # FIX: needs to be updated every iteration
     iter = 0
     target = "example.com" + str(iter)
     # previous_serial = get_serial(target, "8.8.8.8")
@@ -168,7 +169,7 @@ def main(argv):
                 current_time = createTimeStamp()
 
             if result_check:
-                current_serial = get_serial(target, "8.8.8.8") # double check this is what I need to feed in
+                current_serial = get_serial(target, "127.0.0.1") # double check this is what I need to feed in
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
 
                 with open('somefile.txt', 'a') as the_file:
