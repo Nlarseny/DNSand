@@ -6,6 +6,7 @@ import dns.message
 import dns.query
 import dns.flags
 
+TIME_LIST = [300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
 
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
@@ -55,6 +56,14 @@ def checkIfTime(time_a, time_b, flex_max, flex_min):
     else:
         return False
 
+def negCheckIfTime(time_a, time_b, flex_min):
+    delta = deltaTimeStamp(time_a, time_b)
+    if delta <= flex_min:
+        print("hit (neg)")
+        return True
+    else:
+        return False
+
 
 def get_list_times(file_name):
     my_file = open(file_name, "r")
@@ -87,7 +96,7 @@ def next_target(time_list, current_time):
     small_iter = -1
     for t in time_till:
         iter += 1
-        print(iter)
+        # print(iter)
         if t >= 0:
             if t < smallest:
                 smallest = t
@@ -143,7 +152,12 @@ def main(argv):
         target_time = next_target(list_of_times, current_time)
         target_time.print_time()
 
-        timer_list = [300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
+        with open('somefile.txt', 'a') as the_file:
+                first = "Target: " + target_time.get_time() + "\n\n"
+                the_file.write(first)
+
+
+        timer_list = TIME_LIST
         for x in timer_list:
             result_check = checkIfTime(current_time, target_time, x, 0)
             while not result_check:
@@ -154,29 +168,29 @@ def main(argv):
                 current_time = createTimeStamp()
 
             if result_check:
-                current_serial = get_serial(target, "8.8.8.8")
+                current_serial = get_serial(target, "8.8.8.8") # double check this is what I need to feed in
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
 
                 with open('somefile.txt', 'a') as the_file:
                     the_file.write(results)
 
-        prev_time = 0
+
         for x in reversed(timer_list):
-            result_check = checkIfTime(current_time, target_time, prev_time, -1 * x)
+            result_check = negCheckIfTime(current_time, target_time, -1 * x)
             while not result_check:
                 time.sleep(1)
                 print("waiting... (post target)")
                 # checks to see how close the current time is to the target
-                result_check = checkIfTime(current_time, target_time, prev_time, -1 * x)
+                result_check = negCheckIfTime(current_time, target_time, -1 * x)
                 current_time = createTimeStamp()
 
             if result_check:
-                prev_time = -1 * x
                 current_serial = get_serial(target, "8.8.8.8")
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
                 with open('somefile.txt', 'a') as the_file:
                     the_file.write(results)
-
+        with open('somefile.txt', 'a') as the_file:
+            the_file.write("\n\n\n")
 
 
 if __name__ == "__main__":
