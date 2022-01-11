@@ -20,6 +20,10 @@ class TimeStamps:
     def to_seconds(self):
         return (self.hour * 3600) + (self.min * 60) + self.sec
 
+    def get_time(self):
+        line = str(self.hour) + ":" + str(self.min) + ":" + str(self.sec)
+        return line
+
 
 def createTimeStamp():
     x = datetime.now().time()
@@ -44,8 +48,9 @@ def deltaTimeStamp(time_a, time_b):
 
 def checkIfTime(time_a, time_b, flex_max, flex_min):
     delta = deltaTimeStamp(time_a, time_b)
-
+    print(delta)
     if delta >= flex_min and delta <= flex_max:
+        print("hit")
         return True
     else:
         return False
@@ -127,7 +132,7 @@ def main(argv):
 
     iter = 0
     target = "example.com" + str(iter)
-    previous_serial = 0
+    # previous_serial = get_serial(target, "8.8.8.8")
     
 
     while 1:
@@ -136,15 +141,40 @@ def main(argv):
         
         # create next target time
         target_time = next_target(list_of_times, current_time)
+        target_time.print_time()
 
-        result_check = checkIfTime(current_time, target_time, 12889, 0)
-        if result_check:
-            print(get_serial(target, "8.8.8.8"))
-            print("HA")
-        else:
-            print("BWAHAHA")
+        timer_list = [300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
+        for x in timer_list:
+            result_check = checkIfTime(current_time, target_time, x, 0)
+            while not result_check:
+                time.sleep(1)
+                print("waiting...")
+                # checks to see how close the current time is to the target
+                result_check = checkIfTime(current_time, target_time, x, 0)
+                current_time = createTimeStamp()
 
-        time.sleep(5)
+            if result_check:
+                current_serial = get_serial(target, "8.8.8.8")
+                results = current_time.get_time() + " " + str(current_serial) + '\n'
+
+                with open('somefile.txt', 'a') as the_file:
+                    the_file.write(results)
+
+        for x in reversed(timer_list):
+            print(x)
+            result_check = checkIfTime(current_time, target_time, 0, -1 * x)
+            while not result_check:
+                time.sleep(1)
+                print("waiting... (post target)")
+                # checks to see how close the current time is to the target
+                result_check = checkIfTime(current_time, target_time, 0, -1 * x)
+                current_time = createTimeStamp()
+
+            if result_check:
+                current_serial = get_serial(target, "8.8.8.8")
+                results = current_time.get_time() + " " + str(current_serial) + '\n'
+                with open('somefile.txt', 'a') as the_file:
+                    the_file.write(results)
 
 
 
