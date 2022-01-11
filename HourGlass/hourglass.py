@@ -160,17 +160,18 @@ def main(argv):
                 with open('somefile.txt', 'a') as the_file:
                     the_file.write(results)
 
+        prev_time = 0
         for x in reversed(timer_list):
-            print(x)
-            result_check = checkIfTime(current_time, target_time, 0, -1 * x)
+            result_check = checkIfTime(current_time, target_time, prev_time, -1 * x)
             while not result_check:
                 time.sleep(1)
                 print("waiting... (post target)")
                 # checks to see how close the current time is to the target
-                result_check = checkIfTime(current_time, target_time, 0, -1 * x)
+                result_check = checkIfTime(current_time, target_time, prev_time, -1 * x)
                 current_time = createTimeStamp()
 
             if result_check:
+                prev_time = -1 * x
                 current_serial = get_serial(target, "8.8.8.8")
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
                 with open('somefile.txt', 'a') as the_file:
