@@ -6,7 +6,7 @@ import dns.message
 import dns.query
 import dns.flags
 
-TIME_LIST = [300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
+TIME_LIST = [600, 500, 400, 300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
 
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
