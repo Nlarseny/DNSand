@@ -81,21 +81,19 @@ def main(argv):
     # ("ICANN", "199.7.83.42"),
     # ("WIDE", "202.12.27.33")]
 
-    roots = [("verisign(a)_2", "198.41.0.4"),
-    ("USC_2", "199.9.14.201"),
-    ("Cogent Com_2", "192.33.4.12"),
-    ("UM_2", "199.7.91.13")]
+    roots = [("NASA_3", "192.203.230.10")]
 
     # threading should start here
     for r in roots:
         
-        x = threading.Thread(target=ask_root, args=(r[0], r[1]))
-        x.start()
-        print(r)
-
-
+        # x = threading.Thread(target=ask_root, args=(r[0], r[1]))
+        # x.start()
         # print(r)
-        # ask_root(r[0], r[1])
+        
+
+
+        print(r)
+        ask_root(r[0], r[1])
         # time.sleep(3)
 
 

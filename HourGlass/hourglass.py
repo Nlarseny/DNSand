@@ -122,7 +122,6 @@ def get_serial(target, server_root):
                     dns.rdatatype.OPT, create=True, force_unique=True)
     response = dns.query.udp(request, server_root)
 
-
     for rrset in response.authority:
         if rrset.rdtype == dns.rdatatype.SOA:
             return int(rrset[0].serial)
