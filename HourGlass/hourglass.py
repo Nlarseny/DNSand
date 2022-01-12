@@ -132,11 +132,16 @@ def get_serial(target, server_root):
 
 def main(argv):
     opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+    file_name = 'somefile.txt'
+
+    with open(file_name, 'a') as the_file:
+                first = args[0] + "\n"
+                the_file.write(first)
 
     # get list of times from file
     #ip_addr = args[1]
     # exampel: dig @127.0.0.1 example.com121223 SOA
-    list_of_times = get_list_times(args[0])
+    list_of_times = get_list_times(args[1])
     
 
     # FIX: needs to be updated every iteration
@@ -156,7 +161,7 @@ def main(argv):
         target_time = next_target(list_of_times, current_time)
         target_time.print_time()
 
-        with open('somefile.txt', 'a') as the_file:
+        with open(file_name, 'a') as the_file:
                 first = "Target: " + target_time.get_time() + "\n\n"
                 the_file.write(first)
 
@@ -178,7 +183,7 @@ def main(argv):
                 current_serial = get_serial(target_address, "127.0.0.1") # double check this is what I need to feed in
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
 
-                with open('somefile.txt', 'a') as the_file:
+                with open(file_name, 'a') as the_file:
                     the_file.write(results)
 
 
@@ -197,9 +202,9 @@ def main(argv):
             if result_check:
                 current_serial = get_serial(target_address, "127.0.0.1")
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
-                with open('somefile.txt', 'a') as the_file:
+                with open(file_name, 'a') as the_file:
                     the_file.write(results)
-        with open('somefile.txt', 'a') as the_file:
+        with open(file_name, 'a') as the_file:
             the_file.write("\n\n\n")
 
 
