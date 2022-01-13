@@ -253,3 +253,5 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
+    # root changes seem to consistently be between 22:00 and 23:00, as well as between 10:00 and 11:00

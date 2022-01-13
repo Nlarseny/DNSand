@@ -61,7 +61,7 @@ def ask_root(root_name, server_root):
         
         target = "example.com" + str(iter)
         print(target)
-        time.sleep(1)
+        time.sleep(10)
 
 
 def main(argv):
