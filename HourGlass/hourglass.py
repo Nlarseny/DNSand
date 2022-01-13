@@ -1,4 +1,5 @@
-import sys, getopt
+import sys
+from optparse import OptionParser
 from datetime import datetime
 import time
 import dns.name
@@ -55,6 +56,7 @@ def checkIfTime(time_a, time_b, flex_max, flex_min):
         return True
     else:
         return False
+
 
 def negCheckIfTime(time_a, time_b, flex_min):
     delta = deltaTimeStamp(time_a, time_b)
@@ -129,26 +131,67 @@ def get_serial(target, server_root):
     return -1
 
 
-def main(argv):
-    opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
-    file_name = 'somefile.txt'
+def create_time_range(range, increments):
+    # range being time till target, the script will test after as well
+    sec_range = 60 * range
 
-    with open(file_name, 'a') as the_file:
-                first = args[0] + "\n"
-                the_file.write(first)
+    list_time = []
+    list_time.append(sec_range)
+
+    continue_loop = True
+    while sec_range > 0:
+        sec_range -= increments
+        list_time.append(sec_range)
+
+    return list_time
+
+
+
+
+def main(argv):
+    # opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+    parser = OptionParser()
+    parser.add_option("-f", "--file", dest = "filename",
+                  help = "write report to FILE (default.txt will be the output file if argument is left empty)", metavar = "FILE")
+
+    parser.add_option("-l", "--time_list", dest = "time_list",
+                  help = "(required) list of times to target", metavar = "LIST")
+
+    parser.add_option("-r", "--range", dest = "range",
+                  help = "time till (in minutes) target, during which program will be testing target address", metavar = "RANGE")
+
+    parser.add_option("-i", "--increment", dest = "increment",
+                  help = "time between each test while testing", metavar = "INC")
+
+    (options, args) = parser.parse_args()
+
+    if options.filename is not None:
+        file_name = options.filename
+    else:
+        file_name = "default.txt"
+
+    if options.time_list is None:
+        parser.print_help()
+        return
+
+    range = options.range
+    if options.range is None:
+        range = 10
+
+    increment = options.increment
+    if options.increment is None:
+        increment = 10
+
 
     # get list of times from file
     #ip_addr = args[1]
     # exampel: dig @127.0.0.1 example.com121223 SOA
-    list_of_times = get_list_times(args[1])
-    
+    list_of_times = get_list_times(options.time_list)
 
-    # FIX: needs to be updated every iteration
     iter = 0
     target_address = "example.com" + str(iter)
     # previous_serial = get_serial(target, "8.8.8.8")
     
-
     while 1:
         iter += 1
         target_address = "example.com" + str(iter)
@@ -166,6 +209,7 @@ def main(argv):
 
 
         timer_list = TIME_LIST
+        # timer_list = create_time_range()
         for x in timer_list:
             iter += 1
             target_address = "example.com" + str(iter)
