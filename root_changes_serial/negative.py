@@ -60,8 +60,8 @@ def ask_root(root_name, server_root):
             previous_serial = serial
         
         target = "example.com" + str(iter)
-        # print(target)
-        # time.sleep(1)
+        print(target)
+        time.sleep(1)
 
 
 def main(argv):
