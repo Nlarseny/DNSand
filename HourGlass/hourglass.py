@@ -7,7 +7,6 @@ import dns.message
 import dns.query
 import dns.flags
 
-TIME_LIST = [600, 500, 400, 300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
 
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
@@ -118,15 +117,15 @@ def get_serial(target, server_root):
     if not domain.is_absolute():
         domain = domain.concatenate(dns.name.root)
 
-    request = dns.message.make_query(domain, dns.rdatatype.ANY)
-    request.flags |= dns.flags.AD
-    request.find_rrset(request.additional, dns.name.root, ADDITIONAL_RDCLASS,
-                    dns.rdatatype.OPT, create=True, force_unique=True)
-    response = dns.query.udp(request, server_root)
+    request = dns.message.make_query(domain, dns.rdatatype.A, use_edns=0) # use_edns = 0? for below code
+
+    response = dns.query.udp(request, server_root, timeout=2.0) # timeout 2 seconds, throws timeout exception (try around it), .4
 
     for rrset in response.authority:
-        if rrset.rdtype == dns.rdatatype.SOA:
+        if rrset.rdtype == dns.rdatatype.SOA and rrset.name == dns.name.root: # makes sure its the root that owns the record
             return int(rrset[0].serial)
+        else:
+            print("error explanation")
 
     return -1
 
@@ -147,6 +146,7 @@ def create_time_range(range, increments):
 
 
 
+TIME_LIST = [600, 500, 400, 300, 180, 120, 90, 60, 45, 30, 15, 10, 5, 1]
 
 def main(argv):
     # opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
@@ -254,4 +254,4 @@ def main(argv):
 if __name__ == "__main__":
     main(sys.argv[1:])
 
-    # root changes seem to consistently be between 22:00 and 23:00, as well as between 10:00 and 11:00
+    # root changes seem to consistently be between 22:00 and 23:00, as well as between 10:00 and 11:00 (MST)
