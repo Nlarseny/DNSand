@@ -60,8 +60,8 @@ def ask_root(root_name, server_root):
             previous_serial = serial
         
         target = "example.com" + str(iter)
-        # print(target)
-        # time.sleep(1)
+        print(target)
+        time.sleep(10)
 
 
 def main(argv):
@@ -81,7 +81,7 @@ def main(argv):
     # ("ICANN", "199.7.83.42"),
     # ("WIDE", "202.12.27.33")]
 
-    roots = [("NASA_3", "192.203.230.10")]
+    roots = [("NASA_3-para", "192.203.230.10")]
 
     # threading should start here
     for r in roots:
