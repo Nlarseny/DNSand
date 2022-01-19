@@ -119,15 +119,17 @@ def get_serial(target, server_root):
 
     request = dns.message.make_query(domain, dns.rdatatype.A, use_edns=0) # use_edns = 0? for below code
 
-    response = dns.query.udp(request, server_root, timeout=2.0) # timeout 2 seconds, throws timeout exception (try around it), .4
+    try:
+        response = dns.query.udp(request, server_root, timeout=2.0) # timeout 2 seconds, throws timeout exception (try around it), .4
 
-    for rrset in response.authority:
-        if rrset.rdtype == dns.rdatatype.SOA and rrset.name == dns.name.root: # makes sure its the root that owns the record
-            return int(rrset[0].serial)
-        else:
-            print("error explanation")
-
-    return -1
+        for rrset in response.authority:
+            if rrset.rdtype == dns.rdatatype.SOA and rrset.name == dns.name.root: # makes sure its the root that owns the record
+                return int(rrset[0].serial)
+            else:
+                print("error explanation")
+    except Exception as e:
+        print("[Domain Analyzer][Error] %s" % e)
+        return -1
 
 
 def create_time_range(range, increments):
