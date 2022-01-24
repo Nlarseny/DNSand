@@ -44,7 +44,7 @@ def start_recording(root_name, server_root):
         iter += 1
         target_address = "example.com" + str(iter)
         current_serial = get_serial(target_address, server_root)
-        
+        # potential bug, if neg 1 run again until its not for previous
         
         if current_serial != previous_serial or current_serial == -1:
             print(iter)
@@ -57,25 +57,26 @@ def start_recording(root_name, server_root):
                 with open(file_name, 'a') as the_file:
                         first = str(datetime.now().time()) + " " + str(current_serial) + "\n"
                         the_file.write(first)
-            previous_serial = current_serial
+            if current_serial != -1:
+                previous_serial = current_serial
         
         time.sleep(30)
 
 def main(argv):
     # hit the other addresses
-    roots = [("jan_14_verisign(a)", "198.41.0.4"),
-    ("jan_14_USC", "199.9.14.201"),
-    ("jan_14_CogentCom", "192.33.4.12"),
-    ("jan_14_UM", "199.7.91.13"),
-    ("jan_14_NASA", "192.203.230.10"),
-    ("jan_14_ISC", "192.5.5.241"),
-    ("jan_14_US DD (NIC)", "192.112.36.4"),
-    ("jan_14_Army", "198.97.190.53"),
-    ("jan_14_Netnod", "192.36.148.17"),
-    ("jan_14_verisign (j)", "192.58.128.30"),
-    ("jan_14_RIPE", "193.0.14.129"),
-    ("jan_14_ICANN", "199.7.83.42"),
-    ("jan_14_WIDE", "202.12.27.33")]
+    roots = [("jan_24_verisign(a)", "198.41.0.4"),
+    ("jan_24_USC", "199.9.14.201"),
+    ("jan_24_CogentCom", "192.33.4.12"),
+    ("jan_24_UM", "199.7.91.13"),
+    ("jan_24_NASA", "192.203.230.10"),
+    ("jan_24_ISC", "192.5.5.241"),
+    ("jan_24_US DD (NIC)", "192.112.36.4"),
+    ("jan_24_Army", "198.97.190.53"),
+    ("jan_24_Netnod", "192.36.148.17"),
+    ("jan_24_verisign (j)", "192.58.128.30"),
+    ("jan_24_RIPE", "193.0.14.129"),
+    ("jan_24_ICANN", "199.7.83.42"),
+    ("jan_24_WIDE", "202.12.27.33")]
 
 
     for r in roots:
