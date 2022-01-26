@@ -151,3 +151,11 @@ for rrset in response.authority:
 #     second = split_results[2]
 
 #     return int(hour), int(minute), int(math.floor(float(second)))
+
+
+
+
+
+
+# ripe-atlas@ripe.net
+# asked if anyone knew how to get serials from the SOA records in RIPE ATLAS DNS measurements
