@@ -6,6 +6,16 @@ awk '{print $2}' filename.txt
 
 sed '/TIMED/d' ./jan_14_NASA.txt > test.txt
 
+BIND9
+service bind9 start
+service bind9 stop
+service bind9 restart
+service bind9 reload
+service bind9 status
+
+Unbound
+unbound-control start | stop | status
+
 
 21 Jan 2022
 answer this:
