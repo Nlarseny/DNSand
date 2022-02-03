@@ -14,7 +14,7 @@ service bind9 reload
 service bind9 status
 
 Unbound
-unbound-control start | stop | status
+stystemcrl start | stop | status unbound
 
 
 21 Jan 2022
