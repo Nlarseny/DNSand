@@ -20,3 +20,5 @@ unbound-control start | stop | status
 21 Jan 2022
 answer this:
 find the root that updates the earliest, find what order the servers come in after this one (a-m), and the variation of each server
+answer:
+NASA is the slowest, then ICANN, then the rest
