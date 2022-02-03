@@ -2,40 +2,62 @@ import sys
 import glob
 import subprocess
 import os
+import csv
+from csv import writer
 
 
 def get_filenames():
-    # Get the current working directory
-    cwd = os.getcwd()
-    file_list = glob.glob("*.txt") # Include slash or it will search in the wrong directory!!
+    file_list = glob.glob("./test/*.txt") # Include slash or it will search in the wrong directory
+
+    # print(file_list)
 
     return file_list
 
 
-def parse_file():
-    text_files = get_filenames()
+def make_row():
+    files = get_filenames()
 
-    for f in text_files:
-        new_file = os.getcwd() + "/test/edit_" + str(f)
-        print(new_file)
-        current_file = os.getcwd() + "/" + f
-        # os.system(["sed", "/TIMED/d", current_file, ">", new_file])
-        args = "sed /TIMED/d " + current_file + " > " + new_file
-        # print(args)
-        os.system(args)
+    rows = []
+    flag = 0
+    row_iter = 0
+    for file in files:
+        with open(file) as f:
+            lines = f.readlines()
+            
+            tupled = []
+            for line in lines:
+                tupled.append(line.split())
+                
+            row = []
+            for tup in tupled: 
+                if flag == 0:
+                    row.append(tup[1])
+                    flag = 1
+                row.append(tup[0])
+            
+            
 
-        args = "sed /TIMED/d " + current_file + " > " + new_file
-        # print(args)
-        os.system(args)
 
-        args = "sed 1d " + new_file
-        # print(args)
-        os.system(args)
+def create_table(file_list):
+    list_of_headers = ["", "verisign(a)", "USC", "CogentCom",
+    "UM", "NASA", "ISC", "US DD", "Army", "Netnod", "verisign(j)", "RIPE", "ICANN", "WIDE"]
 
+    make_row()
+
+    # Open file in append mode
+    with open('practice.csv', 'a+', newline='') as write_obj:
+        csv_writer = writer(write_obj)
+
+        # Add headers
+        csv_writer.writerow(list_of_headers)
+
+    # with open("practice.csv", 'a') as csv_file:
+    #     first = str(datetime.now().time()) + " " + str(current_serial) + "\n"
+    #     csv_file.write(first)
     
 
 def main(argv):
-    parse_file()
+    create_table([])
 
 
 
