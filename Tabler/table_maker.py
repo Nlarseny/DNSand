@@ -84,6 +84,9 @@ def get_spread(rows):
             print(rows[i][j])
             final = TimeStamps(int(result[0]), int(result[1]), float(result[2]))
             rows[i][j] = final
+        for j in range (1, len(rows[i])):
+            x=0
+        
 
 
     
