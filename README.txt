@@ -21,6 +21,11 @@ stystemcrl start | stop | status unbound
 answer this:
 find the root that updates the earliest, find what order the servers come in after this one (a-m), and the variation of each server
 
+answer:
+NASA is the slowest, then ICANN, then the rest
+1259d771a4143bd7a24683c6b4ae5940ea5ed413
+
+
 
 
 1 Feb 2022
