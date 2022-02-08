@@ -43,7 +43,6 @@ def get_filenames():
 def make_rows():
     files = get_filenames()
 
-
     # do while there are lines, all files should have the same number of lines after being cleaned
     line_num = 0
     with open(files[0]) as f:
@@ -76,18 +75,80 @@ def make_rows():
             
 def get_spread(rows):
     # need a winner by row
+    files = get_filenames()
 
+    smallest_list = []
     # this converts the rows to rows of timestamp objects
     for i in range(0, len(rows)):
         for j in range (1, len(rows[i])):
             result = rows[i][j].split(":")
-            print(rows[i][j])
+            #print(rows[i][j])
+            
             final = TimeStamps(int(result[0]), int(result[1]), float(result[2]))
-            rows[i][j] = final
-        for j in range (1, len(rows[i])):
-            x=0
-        
+            rows[i][j] = (final, files[j - 1])
+            smallest_list.append((final.to_seconds(), j, final))
 
+        
+        # going by row, want to find the earliest object and then get the rest in order
+        # smallest = rows[i][1][0]
+        # smallest_val = 9999999999999999999999999
+        # smallest_iter = 0
+        
+        
+        # get smallest
+        # for j in range (1, len(rows[i])):
+        #     delta = deltaTimeStamp(smallest, rows[i][j][0])
+        #     if deltaTimeStamp(smallest, rows[i][j][0]) < smallest_val:
+        #         smallest = rows[i][j][0]
+        #         smallest_val = delta
+        #         smallest_iter = j
+        #     # print(smallest.get_time())
+
+        # BUG
+
+        smallest_list.sort(key=lambda y: y[0])
+
+        order_list = []
+        for i in range(0, 13):
+            index_file = smallest_list[i][1]
+            order_list.append((smallest_list[i][0], files[index_file - 1]))
+            print(order_list)
+
+        smallest = smallest_list[0][2]
+        smallest_val = smallest[0][0]
+        smallest_iter = smallest[0][1]
+
+
+        vals = []
+        temp = ((smallest, smallest_iter), smallest_val)
+        #print(temp[0][0].get_time(), temp[1])
+        #vals.append(temp)
+        for j in range (1, len(rows[i])):
+            if j != smallest_iter:
+                delta = deltaTimeStamp(smallest, rows[i][j][0])
+                next_temp = ((rows[i][j][0], j), delta)
+                #print(next_temp[0].get_time(), ":", next_temp[1])
+                vals.append(next_temp)
+            else:
+                next_temp = ((smallest, smallest_iter), smallest_val)
+                #print(next_temp[0].get_time(), ":", next_temp[1])
+                vals.append(next_temp)
+
+        for i in range(0, len(vals)):
+            print(vals[i][0][0].get_time(), vals[i][1])
+        vals.sort(key=lambda y: y[1])
+        print("------------------------------------")
+
+        for i in range(0, len(vals)):
+            print(vals[i][0][0].get_time(), vals[i][1])
+
+        print("-----------------END-----------------")
+
+        #print(vals)
+        # for i in range(0, len(rows)):
+    #     for j in range (1, len(rows[i])):
+    #         print(rows[i][j][0].get_time(), ":", rows[i][j][1])
+            
 
     
 
