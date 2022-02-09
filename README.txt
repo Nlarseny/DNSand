@@ -36,10 +36,24 @@ ark
 
 
 2 Feb 2022
-cd /usr/local/ark/activity/dns-access
+cd /usr/local/ark/activity/dns-access/ArkDNS
 git clone https://github.com/Nlarseny/ArkDNS.git
-to install dnspython : /usr/local/ark/bin/pip3 install dnspython --user
+/usr/local/ark/bin/pip3 install dnspython --user
+cd ArkDNS
+mkdir []
+cd []
 nohup /usr/local/ark/bin/python3 ../timechecker.py &
+
+git config --global user.name "Nlarseny"
+git config --global user.email "larsen.d.nathan@gmail.com"
+git config -l
+
+git add .
+git commit -m "added new node"
+git pull
+git push
+
+
 
 /usr/local/ark/bin/pip3 install dnspython
 
@@ -53,3 +67,15 @@ git config -l
 git config --global credential.helper cache
 
 NOTE: you need to make one commit for it to cache it
+
+
+
+4 Feb 2022
+nohup /usr/local/ark/bin/python3 ../timechecker.py > /dev/null & -> keiv && ham
+nohup /usr/local/ark/bin/python3 ../timechecker.py & -> san
+
+
+
+8 Feb 2022
+
+
