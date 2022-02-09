@@ -109,10 +109,10 @@ def get_spread(rows):
         smallest_list.sort(key=lambda y: y[0])
 
         order_list = []
-        for i in range(0, 13):
-            index_file = smallest_list[i][1]
-            order_list.append((smallest_list[i][0], files[index_file - 1], smallest_list[i][2]))
-            print(order_list)
+        for k in range(0, 13):
+            index_file = smallest_list[k][1]
+            order_list.append((smallest_list[k][0], files[index_file - 1], smallest_list[k][2]))
+            # print(order_list)
 
         smallest = order_list[0][2]
         smallest_val = order_list[0][0]
@@ -123,8 +123,8 @@ def get_spread(rows):
         temp = ((smallest, smallest_iter), smallest_val)
         #print(temp[0][0].get_time(), temp[1])
         #vals.append(temp)
-        for j in range (1, len(rows[i])):
-            if j != smallest_iter:
+        for j in range (0, 13):
+            if files[j] != smallest_iter:
                 delta = deltaTimeStamp(smallest, rows[i][j][0])
                 next_temp = ((rows[i][j][0], j), delta)
                 #print(next_temp[0].get_time(), ":", next_temp[1])
