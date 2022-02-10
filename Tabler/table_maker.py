@@ -1,9 +1,7 @@
 import sys
 import glob
-import subprocess
-import os
-import csv
 from csv import writer
+import numpy as np
 
 
 class TimeStamps:
@@ -77,9 +75,11 @@ def get_spread(rows):
     # need a winner by row
     files = get_filenames()
 
-    smallest_list = []
+    all_vals = []
+    # smallest_list = []
     # this converts the rows to rows of timestamp objects
     for i in range(0, len(rows)):
+        smallest_list = []
         for j in range (1, len(rows[i])):
             result = rows[i][j].split(":")
             #print(rows[i][j])
@@ -87,24 +87,6 @@ def get_spread(rows):
             final = TimeStamps(int(result[0]), int(result[1]), float(result[2]))
             rows[i][j] = (final, files[j - 1])
             smallest_list.append((final.to_seconds(), j, final))
-
-        
-        # going by row, want to find the earliest object and then get the rest in order
-        # smallest = rows[i][1][0]
-        # smallest_val = 9999999999999999999999999
-        # smallest_iter = 0
-        
-        
-        # get smallest
-        # for j in range (1, len(rows[i])):
-        #     delta = deltaTimeStamp(smallest, rows[i][j][0])
-        #     if deltaTimeStamp(smallest, rows[i][j][0]) < smallest_val:
-        #         smallest = rows[i][j][0]
-        #         smallest_val = delta
-        #         smallest_iter = j
-        #     # print(smallest.get_time())
-
-        # BUG
 
         smallest_list.sort(key=lambda y: y[0])
 
@@ -120,7 +102,8 @@ def get_spread(rows):
 
 
         vals = []
-        temp = ((smallest, smallest_iter), smallest_val)
+        temp = ((smallest, smallest_iter), 0)
+        vals.append(temp)
         #print(temp[0][0].get_time(), temp[1])
         #vals.append(temp)
         for j in range (0, 13):
@@ -132,13 +115,60 @@ def get_spread(rows):
             else:
                 next_temp = ((smallest, smallest_iter), 0)
                 #print(next_temp[0].get_time(), ":", next_temp[1])
-                vals.append(next_temp)
+                #vals.append(next_temp)
 
         vals.sort(key=lambda y: y[1])
 
+        all_vals.append(vals)
 
-        # vals contains the sorted spread, now to move it to the excel sheet
-            
+    return all_vals
+
+
+
+def print_spread(all_vals):
+    # vals contains the sorted spread, now to move it to the excel sheet
+    with open('practice.csv', 'a+', newline='') as write_obj:
+        csv_writer = writer(write_obj)
+
+        # Add spaces
+        blanks = ["", "", ""]
+        csv_writer.writerow(blanks)
+
+        spread_header = ["Spread by Serial", "", ""]
+        csv_writer.writerow(spread_header)
+
+
+    for vals in all_vals:
+        # what if we get a list of each of the three things in vals?
+        names = []
+        time_stamps = []
+        deltas = []
+
+        for v in vals:
+            names.append(v[0][1])
+            time_stamps.append(v[0][0].get_time())
+            deltas.append(v[1])
+
+        names.insert(0, "Name")
+        time_stamps.insert(0, "Time")
+        deltas.insert(0, "Delta")
+
+        with open('practice.csv', 'a+', newline='') as write_obj:
+            csv_writer = writer(write_obj)
+            csv_writer.writerow(names)
+            csv_writer.writerow(time_stamps)
+            csv_writer.writerow(deltas)
+
+            blanks = ["", "", ""]
+            csv_writer.writerow(blanks)
+
+    # create a pad for the next one
+    with open('practice.csv', 'a+', newline='') as write_obj:
+        csv_writer = writer(write_obj)
+        blanks = ["", "", ""]
+        csv_writer.writerow(blanks)
+        csv_writer.writerow(blanks)
+        csv_writer.writerow(blanks)
 
     
 
@@ -156,7 +186,7 @@ def create_table(file_list):
 
 
     # Open file in append mode
-    with open('practice.csv', 'a+', newline='') as write_obj:
+    with open('practice.csv', 'a', newline='') as write_obj:
         csv_writer = writer(write_obj)
 
         # Add headers
@@ -167,7 +197,9 @@ def create_table(file_list):
             csv_writer.writerow(row)
 
         # get the spread for each row
-        get_spread(rows)
+        all_vals = get_spread(rows)
+    
+    print_spread(all_vals)
     
 
 def main(argv):
