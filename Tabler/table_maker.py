@@ -125,24 +125,19 @@ def get_spread(rows):
         #vals.append(temp)
         for j in range (0, 13):
             if files[j] != smallest_iter:
-                delta = deltaTimeStamp(smallest, rows[i][j][0])
-                next_temp = ((rows[i][j][0], j), delta)
+                delta = deltaTimeStamp(smallest, rows[i][j+1][0])
+                next_temp = ((rows[i][j+1][0], files[j]), delta)
                 #print(next_temp[0].get_time(), ":", next_temp[1])
                 vals.append(next_temp)
             else:
-                next_temp = ((smallest, smallest_iter), smallest_val)
+                next_temp = ((smallest, smallest_iter), 0)
                 #print(next_temp[0].get_time(), ":", next_temp[1])
                 vals.append(next_temp)
 
-        for i in range(0, len(vals)):
-            print(vals[i][0][0].get_time(), vals[i][1])
+        vals.sort(key=lambda y: y[1])
 
-        print("-----------------END-----------------")
 
-        #print(vals)
-        # for i in range(0, len(rows)):
-    #     for j in range (1, len(rows[i])):
-    #         print(rows[i][j][0].get_time(), ":", rows[i][j][1])
+        # vals contains the sorted spread, now to move it to the excel sheet
             
 
     
