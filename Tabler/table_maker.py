@@ -2,6 +2,7 @@ import sys
 import glob
 from csv import writer
 import numpy as np
+import copy
 
 
 class TimeStamps:
@@ -124,8 +125,11 @@ def get_spread(rows):
     return all_vals
 
 
+def average_list(lister):
+    return sum(lister) / len(lister)
 
-def print_spread(all_vals):
+
+def print_spread(all_vals, rows):
     # vals contains the sorted spread, now to move it to the excel sheet
     with open('practice.csv', 'a+', newline='') as write_obj:
         csv_writer = writer(write_obj)
@@ -138,6 +142,7 @@ def print_spread(all_vals):
         csv_writer.writerow(spread_header)
 
 
+    counter = 0
     for vals in all_vals:
         # what if we get a list of each of the three things in vals?
         names = []
@@ -149,12 +154,40 @@ def print_spread(all_vals):
             time_stamps.append(v[0][0].get_time())
             deltas.append(v[1])
 
+
+        copy_deltas = copy.deepcopy(deltas)
+        # add delta averages
+        pad = ["", "Average", "", "25%", "50%", "75%", "90%"]
+        time_stamps.extend(pad)
+
+        pad = ["", average_list(copy_deltas)]
+        deltas.extend(pad)
+
+
+        # add percentiles
+        # p = np.percentile(a, 50)
+        add_percentiles = [""]
+        add_percentiles.append(np.percentile(copy_deltas, 25))
+        add_percentiles.append(np.percentile(copy_deltas, 50))
+        add_percentiles.append(np.percentile(copy_deltas, 75))
+        add_percentiles.append(np.percentile(copy_deltas, 90))
+
+        deltas.extend(add_percentiles)
+        
+
+
         names.insert(0, "Name")
         time_stamps.insert(0, "Time")
         deltas.insert(0, "Delta")
 
+
         with open('practice.csv', 'a+', newline='') as write_obj:
+            serial = [rows[counter][0]]
+            counter += 1
+
             csv_writer = writer(write_obj)
+
+            csv_writer.writerow(serial)
             csv_writer.writerow(names)
             csv_writer.writerow(time_stamps)
             csv_writer.writerow(deltas)
@@ -199,7 +232,7 @@ def create_table(file_list):
         # get the spread for each row
         all_vals = get_spread(rows)
     
-    print_spread(all_vals)
+    print_spread(all_vals, rows)
     
 
 def main(argv):
