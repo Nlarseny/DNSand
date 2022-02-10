@@ -76,6 +76,7 @@ nohup /usr/local/ark/bin/python3 ../timechecker.py & -> san
 
 
 
-8 Feb 2022
+10 Feb 2022
+[] need to check ipv4 and ipv6 
 
 
