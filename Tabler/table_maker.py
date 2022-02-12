@@ -5,6 +5,7 @@ import numpy as np
 import copy
 
 
+
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
         self.hour = hour
@@ -37,13 +38,10 @@ def get_filenames():
     all_files = glob.glob('./**/*.txt', 
                    recursive = True)
 
-    # print(all_files)
-
-    # return file_list
     return all_files
 
 
-def make_rows():
+def make_rows(serial_num):
     files = get_filenames()
 
     # do while there are lines, all files should have the same number of lines after being cleaned
@@ -71,7 +69,9 @@ def make_rows():
                     tupled.append(line.split())
                 row.append(tupled[i][0])
         
-        rows.append(row)
+        # where we can sync up the serials
+        if int(row[0]) >= serial_num:
+            rows.append(row)
 
     return rows
             
@@ -210,7 +210,7 @@ def print_spread(all_vals, rows):
     
 
 
-def create_table(file_list):
+def create_table(serial_num):
     # list_of_headers = ["SERIALS", "verisign(a)", "USC", "CogentCom",
     # "UM", "NASA", "ISC", "US DD", "Army", "Netnod", "verisign(j)", "RIPE", "ICANN", "WIDE"]
 
@@ -229,7 +229,7 @@ def create_table(file_list):
         # Add headers
         csv_writer.writerow(list_of_headers)
 
-        rows = make_rows()
+        rows = make_rows(serial_num)
         for row in rows:
             csv_writer.writerow(row)
 
@@ -240,7 +240,10 @@ def create_table(file_list):
     
 
 def main(argv):
-    create_table([])
+    serial_num = 0
+    if len(argv) > 0:
+        serial_num = int(argv[0])
+    create_table(serial_num)
 
 
 
