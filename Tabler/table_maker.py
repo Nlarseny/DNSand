@@ -32,11 +32,15 @@ def deltaTimeStamp(time_a, time_b):
 
 
 def get_filenames():
-    file_list = glob.glob("./test/*.txt") # Include slash or it will search in the wrong directory
+    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
 
-    # print(file_list)
+    all_files = glob.glob('./**/*.txt', 
+                   recursive = True)
 
-    return file_list
+    # print(all_files)
+
+    # return file_list
+    return all_files
 
 
 def make_rows():
@@ -92,7 +96,7 @@ def get_spread(rows):
         smallest_list.sort(key=lambda y: y[0])
 
         order_list = []
-        for k in range(0, 13):
+        for k in range(0, len(rows[i]) - 1):
             index_file = smallest_list[k][1]
             order_list.append((smallest_list[k][0], files[index_file - 1], smallest_list[k][2]))
             # print(order_list)
@@ -107,7 +111,7 @@ def get_spread(rows):
         vals.append(temp)
         #print(temp[0][0].get_time(), temp[1])
         #vals.append(temp)
-        for j in range (0, 13):
+        for j in range (0, len(rows[i]) - 1):
             if files[j] != smallest_iter:
                 delta = deltaTimeStamp(smallest, rows[i][j+1][0])
                 next_temp = ((rows[i][j+1][0], files[j]), delta)
