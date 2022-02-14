@@ -23,6 +23,7 @@ find the root that updates the earliest, find what order the servers come in aft
 
 answer:
 NASA is the slowest, then ICANN, then the rest
+
 1259d771a4143bd7a24683c6b4ae5940ea5ed413
 
 
@@ -36,7 +37,7 @@ ark
 
 
 2 Feb 2022
-cd /usr/local/ark/activity/dns-access/ArkDNS
+cd /usr/local/ark/activity/dns-access
 git clone https://github.com/Nlarseny/ArkDNS.git
 /usr/local/ark/bin/pip3 install dnspython --user
 cd ArkDNS
@@ -53,6 +54,7 @@ git commit -m "added new node"
 git pull
 git push
 
+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
 
 
 /usr/local/ark/bin/pip3 install dnspython
@@ -78,5 +80,18 @@ nohup /usr/local/ark/bin/python3 ../timechecker.py & -> san
 
 10 Feb 2022
 [] need to check ipv4 and ipv6 
+
+
+14 Feb 2022
+
+Blacklist of Ark Nodes:
+
+stx-vi
+acc-gh
+adl-au (down)
+akl2-nz
+ams-nl
+
+
 
 
