@@ -185,6 +185,7 @@ def main(argv):
         increment = 10
 
 
+    
     # get list of times from file
     #ip_addr = args[1]
     # exampel: dig @127.0.0.1 example.com121223 SOA
@@ -211,6 +212,18 @@ def main(argv):
 
 
         timer_list = TIME_LIST
+
+        # added in to create the list for the checker to check for x amount of time
+        timer_list = []
+
+        
+
+        for k in range(270):
+            #print(k)
+            #temp = 2700 - 10 * k
+            timer_list.append()
+
+
         # timer_list = create_time_range()
         for x in timer_list:
             iter += 1
@@ -225,7 +238,7 @@ def main(argv):
                 current_time = createTimeStamp()
 
             if result_check:
-                current_serial = get_serial(target_address, "127.0.0.1") # double check this is what I need to feed in
+                current_serial = get_serial(target_address, "127.0.0.1") # change this to the roots (ipv4 and ipv6)
                 results = current_time.get_time() + " " + str(current_serial) + '\n'
 
                 with open(file_name, 'a') as the_file:
@@ -257,3 +270,6 @@ if __name__ == "__main__":
     main(sys.argv[1:])
 
     # root changes seem to consistently be between 22:00 and 23:00, as well as between 10:00 and 11:00 (MST)
+
+
+    # I think I now want it to check for x amount of time with n being the midpoint target
