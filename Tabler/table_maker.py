@@ -215,11 +215,11 @@ def print_spread(all_vals, rows):
 
         copy_deltas = copy.deepcopy(deltas)
         # add delta averages
-        pad = ["", "Average", "", "25%", "50%", "75%", "90%"]
-        time_stamps.extend(pad)
+        # pad = ["", "Average", "", "25%", "50%", "75%", "90%"]
+        # time_stamps.extend(pad)
 
-        pad = ["", average_list(copy_deltas)]
-        deltas.extend(pad)
+        # pad = ["", average_list(copy_deltas)]
+        # deltas.extend(pad)
 
 
         
@@ -232,6 +232,7 @@ def print_spread(all_vals, rows):
             percentiles_v4.append(np.percentile(ipv4_deltas, 50))
             percentiles_v4.append(np.percentile(ipv4_deltas, 75))
             percentiles_v4.append(np.percentile(ipv4_deltas, 90))
+            percentiles_v4.append(max(ipv4_deltas))
 
         percentiles_v6 = ["ipv6"]
         if len(ipv6_deltas) > 0:
@@ -240,6 +241,16 @@ def print_spread(all_vals, rows):
             percentiles_v6.append(np.percentile(ipv6_deltas, 50))
             percentiles_v6.append(np.percentile(ipv6_deltas, 75))
             percentiles_v6.append(np.percentile(ipv6_deltas, 90))
+            percentiles_v6.append(max(ipv6_deltas))
+
+        percentiles_both = ["ipv4/6"]
+        if len(ipv6_deltas) > 0 and len(ipv6_deltas) > 0:
+            percentiles_both.append(average_list(copy_deltas))
+            percentiles_both.append(np.percentile(copy_deltas, 25))
+            percentiles_both.append(np.percentile(copy_deltas, 50))
+            percentiles_both.append(np.percentile(copy_deltas, 75))
+            percentiles_both.append(np.percentile(copy_deltas, 90))
+            percentiles_both.append(max(ipv4_deltas))
 
         # copy deltas has both...
 
@@ -260,7 +271,7 @@ def print_spread(all_vals, rows):
 
         first_ipv6 = None
         for i in range(len(vals)):
-            if vals[i][2].ipv == "ipv6":
+            if vals[i][2].ipv == 6:
                 first_ipv6 = vals[i][2]
                 break
 
@@ -292,9 +303,10 @@ def print_spread(all_vals, rows):
             csv_writer.writerow(first_ipv4_info)
             csv_writer.writerow(first_ipv6_info)
 
-            csv_writer.writerow(["", "Average", "25%", "50%", "75%", "90%"])
+            csv_writer.writerow(["", "Average", "25%", "50%", "75%", "90%", "Max"])
             csv_writer.writerow(percentiles_v4)
             csv_writer.writerow(percentiles_v6)
+            csv_writer.writerow(percentiles_both)
 
             blanks = ["", "", ""]
             csv_writer.writerow(blanks)
