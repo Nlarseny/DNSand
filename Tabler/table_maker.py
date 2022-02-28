@@ -3,6 +3,7 @@ import glob
 from csv import writer
 import numpy as np
 import copy
+import matplotlib.pyplot as plt
 
 
 
@@ -189,6 +190,15 @@ def print_spread(all_vals, rows):
         csv_writer.writerow(spread_header)
 
 
+    # this is where we can start to gather data for each serial of first, first_ipv4, ect
+    first_ipv4_all = []
+    first_all = []
+    first_ipv6_all = []
+
+    ipv4_mean = []
+    ipv4_median = []
+    ipv4_max = []
+
     counter = 0
     for vals in all_vals:
         # what if we get a list of each of the three things in vals?
@@ -252,9 +262,11 @@ def print_spread(all_vals, rows):
             percentiles_both.append(np.percentile(copy_deltas, 90))
             percentiles_both.append(max(ipv4_deltas))
 
-        # copy deltas has both...
-
-        # deltas.extend(add_percentiles)
+        
+        # adding for the nice graphs
+        ipv4_mean.append(average_list(ipv4_deltas))
+        ipv4_median.append(np.percentile(ipv4_deltas, 50))
+        ipv4_max.append(max(ipv4_deltas))
         
 
 
@@ -287,6 +299,11 @@ def print_spread(all_vals, rows):
         if first_ipv6 != None:
             first_ipv6_info = ["First_ipv6", first_ipv6.node, first_ipv6.server, first_ipv6.ipv]
 
+        # adding to the collection
+        first_ipv4_all.append(([rows[counter][0]], first_ipv4))
+        first_all.append((rows[counter][0], first))
+        first_ipv6_all.append((rows[counter][0], first_ipv6))
+
 
         with open('practice.csv', 'a+', newline='') as write_obj:
             serial = [rows[counter][0]]
@@ -318,6 +335,43 @@ def print_spread(all_vals, rows):
         csv_writer.writerow(blanks)
         csv_writer.writerow(blanks)
         csv_writer.writerow(blanks)
+
+
+    # make graphs with matplotlib
+    serials = []
+    ipv4_times = []
+    first_times = []
+    for i in first_ipv4_all:
+        serials.append(int(i[0][0]))
+        ipv4_times.append(i[1].seconds)
+    
+    for k in first_all:
+        first_times.append(k[1].seconds)
+
+    # ipv6_times = []
+    # for j in first_ipv6_all:
+    #     ipv6_times.append(j[1].seconds)
+
+    plt.plot(serials, ipv4_times, label = "ipv4")
+    # plt.plot(serials, ipv6_times, label = "line 2")
+    plt.plot(serials, first_times, label = "first")
+    plt.ylabel('')
+    plt.xlabel('serial update')
+    plt.legend()
+    plt.show()
+
+
+    # for the mean, median, percentiles, etc
+    plt.plot(serials, ipv4_mean, label = "ipv4 averages")
+    plt.plot(serials, ipv4_median, label = "ipv4 medians")
+    plt.plot(serials, ipv4_max, label = "ipv4 maxes")
+
+    # add ipv6
+
+    plt.ylabel('lag time')
+    plt.xlabel('serial update')
+    plt.legend()
+    plt.show()
 
     
 
