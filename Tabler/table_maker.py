@@ -73,9 +73,9 @@ def make_rows(serial_num):
             row.append(temp[1])
 
         for file in files:
+
             with open(file) as f:
                 lines = f.readlines()
-                
                 tupled = []
                 for line in lines:
                     tupled.append(line.split())
@@ -402,11 +402,12 @@ def create_table(serial_num):
         # get the spread for each row
         all_vals = get_spread(rows)
 
+    # this is far more important
     print_spread(all_vals, rows)
     
 
 def main(argv):
-    serial_num = 0
+    serial_num = 2022022501
     if len(argv) > 0:
         serial_num = int(argv[0])
     create_table(serial_num)
