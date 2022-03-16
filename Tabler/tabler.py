@@ -5,6 +5,9 @@ import numpy as np
 import copy
 import matplotlib.pyplot as plt
 import datetime
+from datetime import time
+import matplotlib.dates as mdates
+import pandas as pd
 
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
@@ -52,7 +55,25 @@ def get_filenames():
     #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
 
     all_files = glob.glob('./**/*.txt', 
-                   recursive = True)
+                   recursive = True) # to split into two groups, have two folders, best and worst case scenarios
+
+    return all_files
+
+
+def get_worst_filenames():
+    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
+
+    all_files = glob.glob('./worst_case/**/*.txt', 
+                   recursive = True) # to split into two groups, have two folders, best and worst case scenarios
+
+    return all_files
+
+
+def get_best_filenames():
+    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
+
+    all_files = glob.glob('./best_case/**/*.txt', 
+                   recursive = True) # to split into two groups, have two folders, best and worst case scenarios
 
     return all_files
 
@@ -67,8 +88,9 @@ def get_file_parse(file):
     
     parts = file.split("/")
 
-    node = parts[1]
-    server = parts[2].split("-")[0]
+    case = parts[1]
+    node = parts[2]
+    server = parts[3].split("-")[0]
 
     return node, server, ipv
 
@@ -77,8 +99,8 @@ def average_list(lister):
     return sum(lister) / len(lister)
 
 
-def organize_data(serial_num):
-    files = get_filenames()
+def organize_data_worst(serial_num):
+    files = get_worst_filenames()
 
     # create a list of datapoint objects (2d array)
     by_serial = {}
@@ -108,6 +130,38 @@ def organize_data(serial_num):
     return by_serial
 
 
+def organize_data_best(serial_num):
+    files = get_best_filenames()
+
+    # create a list of datapoint objects (2d array)
+    by_serial = {}
+    first_time = 0
+    for file in files:
+        
+        with open(file) as f:
+            lines = f.readlines()
+
+            if first_time == 0:
+                for line in lines:
+                    temp = line.split()
+                    serial = temp[1]
+                    by_serial[serial] = []
+                first_time = -2
+            
+            for line in lines:
+                temp = line.split()
+                time = temp[0]
+                serial = temp[1]
+                time_stamp = create_timestamp(time)
+
+                node, server, ipv = get_file_parse(file)
+
+                by_serial[serial].append(DataPoint(node, server, ipv, -1, time_stamp.to_seconds(), time_stamp))
+
+    return by_serial
+
+
+
 def sort_data(data):
     for key in data:
         datapoints = data[key]
@@ -127,7 +181,7 @@ def seconds_to_time(time_list):
 
 
 
-def print_spread(data):
+def pre_print_spread(data):
     # data[key] contains the sorted spread, now to move it to the excel sheet
     with open('practice.csv', 'a+', newline='') as write_obj:
         csv_writer = writer(write_obj)
@@ -310,7 +364,7 @@ def print_spread(data):
     # create dictionary of key|[] to seperate by nodes
     nodes = []
     servers = []
-    files = get_filenames()
+    files = get_worst_filenames()
     for file in files:
         node, server, ipv = get_file_parse(file)
         nodes.append(node)
@@ -340,122 +394,10 @@ def print_spread(data):
 
     x = [str(x) for x in serials]
 
-    # by nodes then graph by servers for each node
-    # we will title each graph by its node, then the lines will be by server...
-    for n in nodes:
-        time_list_by_server_v4 = {}
-        time_list_by_server_v6 = {}
-        serials_ipv4 = {}
-        serials_ipv6 = {}
-        for i in data_by_nodes[n]:
-            for j in servers:
-                if j not in time_list_by_server_v4:
-                    time_list_by_server_v4[j] = []
-                    serials_ipv4[j] = []
-                else:
-                    if j == i[1].server and i[1].ipv == 4:
-                        time_list_by_server_v4[j].append(i[1].seconds)
-                        serials_ipv4[j].append(i[0])
-                    
-                if j not in time_list_by_server_v6:
-                    time_list_by_server_v6[j] = []
-                    serials_ipv6[j] = []
-                else:
-                    if j == i[1].server and i[1].ipv == 6:
-                        time_list_by_server_v6[j].append(i[1].seconds)
-                        serials_ipv6[j].append(i[0])
-                    
-        
 
-        for j in servers:
-            temp_x = []
-            for k in serials_ipv4[j]:
-                temp_x.append(int(k))
-            temp_x.sort()
-
-            serials_ipv4[j] = []
-            for k in temp_x:
-                serials_ipv4[j].append(str(k))
-
-            plt.plot(serials_ipv4[j], time_list_by_server_v4[j], label = j + "-ipv4")
-              
-        plt.title(n + " ipv4")
-        plt.ylabel('Time')
-        plt.xlabel('Serial')
-        plt.xticks(rotation=90)
-        plt.legend()
-        # plt.title("By Nodes")
-        plt.tight_layout()
-        plt.show()
-
-        for j in servers:
-            temp_x = []
-            for k in serials_ipv6[j]:
-                temp_x.append(int(k))
-            temp_x.sort()
-
-            serials_ipv6[j] = []
-            for k in temp_x:
-                serials_ipv6[j].append(str(k))
-
-            plt.plot(serials_ipv6[j], time_list_by_server_v6[j], label = j + "-ipv6")
-
-        plt.title(n + " ipv6")
-        plt.ylabel('Time')
-        plt.xlabel('Serial')
-        plt.xticks(rotation=90)
-        plt.legend()
-        # plt.title("By Nodes")
-        plt.tight_layout()
-        plt.show()
+    return nodes, data_by_nodes, servers # serials
 
 
-
-
-    # serials = [str(x) for x in serials]
-    # x = [str(x) for x in serials]
-
-    plt.plot(x, ipv4_times, label = "ipv4")
-    plt.plot(x, ipv6_times, label = "ipv6")
-    plt.ylabel('')
-    plt.xlabel('Serial')
-    # plt.tick_params(axis='x', labelsize=5)
-    plt.xticks(rotation=90)
-    plt.legend()
-    plt.title("First to Update")
-    plt.tight_layout()
-    plt.show()
-
-
-    # for the mean, median, percentiles, etc
-    # plt.plot(x, ipv4_mean, label = "ipv4 averages", linewidth = 1)
-    # plt.plot(x, ipv4_median, label = "ipv4 medians", linewidth = 1)
-    # plt.plot(x, ipv4_75, label = "ipv4 75%", linewidth = 1)
-    # plt.plot(x, ipv4_90, label = "ipv4 90%", linewidth = 1)
-    # plt.plot(x, ipv4_max, label = "ipv4 maxes", linewidth = 1)
-
-    # plt.plot(x, ipv6_mean, label = "ipv6 averages", linewidth = 1)
-    # plt.plot(x, ipv6_median, label = "ipv6 medians", linewidth = 1)
-    # plt.plot(x, ipv6_75, label = "ipv6 75%", linewidth = 1)
-    # plt.plot(x, ipv6_90, label = "ipv6 90%", linewidth = 1)
-    # plt.plot(x, ipv6_max, label = "ipv6 maxes", linewidth = 1)
-
-
-    # plt.ylabel('lag time')
-    # plt.xlabel('serial update')
-    # plt.tick_params(axis='x', labelsize=5)
-    # plt.legend()
-    # plt.title("Lag Time")
-    # plt.show()
-
-
-
-
-
-
-    plt.style.use('_mpl-gallery')
-
-    
     # size and color:
     # sizes = np.random.uniform(15, 80, len(x))
     # colors = np.random.uniform(15, 80, len(x))
@@ -463,28 +405,267 @@ def print_spread(data):
     # plot
     #fig, ax = plt.subplots()
 
-    print(type(x[0]))
-    print(type(ipv4_mean[0]))
+    # print(type(x[0]))
+    # print(type(ipv4_mean[0]))
 
-    plt.scatter(x, ipv4_mean, label="ipv4_mean", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv4_mean, label="ipv4_mean", s=100, alpha = 0.5)
     
-    plt.scatter(x, ipv6_mean, label="ipv6_mean", marker="s", s=100, alpha = 0.5)
-    plt.scatter(x, ipv4_median, label="ipv4_median", s=100, alpha = 0.5)
-    plt.scatter(x, ipv6_median, label="ipv6_median", marker="s", s=100, alpha = 0.5)
-    plt.scatter(x, ipv4_75, label="ipv4_75", s=100, alpha = 0.5)
-    plt.scatter(x, ipv6_75, label="ipv6_75", marker="s", s=100, alpha = 0.5)
-    plt.scatter(x, ipv4_90, label="ipv4_90", s=100, alpha = 0.5)
-    plt.scatter(x, ipv6_90, label="ipv6_90", marker="s", s=100, alpha = 0.5)
-    plt.scatter(x, ipv4_max, label="ipv4_max", s=100, alpha = 0.5)
-    plt.scatter(x, ipv6_max, label="ipv6_max", marker="s", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv6_mean, label="ipv6_mean", marker="s", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv4_median, label="ipv4_median", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv6_median, label="ipv6_median", marker="s", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv4_75, label="ipv4_75", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv6_75, label="ipv6_75", marker="s", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv4_90, label="ipv4_90", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv6_90, label="ipv6_90", marker="s", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv4_max, label="ipv4_max", s=100, alpha = 0.5)
+    # plt.scatter(x, ipv6_max, label="ipv6_max", marker="s", s=100, alpha = 0.5)
 
-    plt.tight_layout()
-    plt.ylabel('Lag Time (Seconds)')
-    plt.xlabel('Serial')
-    plt.xticks(rotation=90)
-    plt.legend()
-    plt.show()
-    plt.close()
+    # plt.tight_layout()
+    # plt.ylabel('Lag Time (Seconds)')
+    # plt.xlabel('Serial')
+    # plt.xticks(rotation=90)
+    # plt.legend()
+    # plt.show()
+    # plt.close()
+
+
+def seconds_to_timestamps(times):
+    new_times = []
+    for t in times:
+        m, s = divmod(t, 60)
+        h, m = divmod(m, 60)
+
+        my_day = datetime.date(2014, 7, 15)
+
+        if h >= 24:
+            h -= 24
+
+        my_time = time(int(h), int(m), int(s))
+
+        new_times.append(datetime.datetime.combine(my_day, my_time))
+
+    return new_times
+
+
+def create_graphs(nodes, data_by_nodes_worst, data_by_nodes_best, servers):
+    # by nodes then graph by servers for each node
+    # we will title each graph by its node, then the lines will be by server...
+    for n in nodes:
+        time_list_by_server_v4_worst = {}
+        time_list_by_server_v6_worst = {}
+        serials_ipv4_worst = {}
+        serials_ipv6_worst = {}
+
+        time_list_by_server_v4_best = {}
+        time_list_by_server_v6_best = {}
+        serials_ipv4_best = {}
+        serials_ipv6_best = {}
+
+        for i in range(len(data_by_nodes_worst[n])):
+            for j in servers:
+                if j not in time_list_by_server_v4_worst:
+                    time_list_by_server_v4_worst[j] = []
+                    serials_ipv4_worst[j] = []
+                if j not in time_list_by_server_v4_best:
+                    time_list_by_server_v4_best[j] = []
+                    serials_ipv4_best[j] = []
+
+                if j == data_by_nodes_worst[n][i][1].server and data_by_nodes_worst[n][i][1].ipv == 4:
+                        time_list_by_server_v4_worst[j].append(data_by_nodes_worst[n][i][1].seconds)
+                        serials_ipv4_worst[j].append(data_by_nodes_worst[n][i][0])
+                if j == data_by_nodes_best[n][i][1].server and data_by_nodes_best[n][i][1].ipv == 4:
+                        time_list_by_server_v4_best[j].append(data_by_nodes_best[n][i][1].seconds)
+                        serials_ipv4_best[j].append(data_by_nodes_best[n][i][0])
+                    
+                if j not in time_list_by_server_v6_worst:
+                    time_list_by_server_v6_worst[j] = []
+                    serials_ipv6_worst[j] = []
+                if j not in time_list_by_server_v6_best:
+                    time_list_by_server_v6_best[j] = []
+                    serials_ipv6_best[j] = []
+
+                if j == data_by_nodes_worst[n][i][1].server and data_by_nodes_worst[n][i][1].ipv == 6:
+                    time_list_by_server_v6_worst[j].append(data_by_nodes_worst[n][i][1].seconds)
+                    serials_ipv6_worst[j].append(data_by_nodes_worst[n][i][0])
+                if j == data_by_nodes_best[n][i][1].server and data_by_nodes_best[n][i][1].ipv == 6:
+                    time_list_by_server_v6_best[j].append(data_by_nodes_best[n][i][1].seconds)
+                    serials_ipv6_best[j].append(data_by_nodes_best[n][i][0])
+                    
+        
+        # move to new function- needs servers, serials_ipv4/6, time_list_by_server_v4/6
+        # the actual plot function needs to take best and worst case for both
+
+        # call in this indentation
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        counter = 0
+        for j in servers:
+            style = 'dashdot'
+            temp_x = []
+            for k in serials_ipv4_worst[j]: # bug?
+                temp_x.append(int(k))
+            temp_x.sort()
+
+            if len(temp_x) > 0 and temp_x[-1] == 2022022500: # NOTE: debugging only
+                print("ooooooooooof")
+
+            serials_ipv4_worst[j] = []
+            for k in temp_x:
+                serials_ipv4_worst[j].append(str(k))
+            
+
+            # time_list_servers have the times
+            # create time stamps from seconds and add it to new array, which will be fed in to replace just seconds
+            worst_times = seconds_to_timestamps(time_list_by_server_v4_worst[j])
+            counter += 1
+            
+            if counter > 10:
+                ax1.plot(serials_ipv4_worst[j], worst_times, label = j + "-ipv4", linestyle = style)
+            else:
+                ax1.plot(serials_ipv4_worst[j], worst_times, label = j + "-ipv4")
+            
+            for tick in ax1.get_xticklabels():
+                tick.set_rotation(90)
+
+            myFmt = mdates.DateFormatter('%H:%M:%S')
+            ax1.yaxis.set_major_formatter(myFmt)
+
+            ax1.set_ylabel('Time')
+            ax1.set_xlabel('Serial')
+            ax1.set_title(n + " ipv4" + " (Worst Case)")
+            # ax1.tight_layout()
+
+            
+            best_times = seconds_to_timestamps(time_list_by_server_v4_best[j])
+
+            # ax2.plot(serials_ipv4_best[j], best_times, label = j + "-ipv4")
+            if counter > 10:
+                ax2.plot(serials_ipv4_worst[j], best_times, label = j + "-ipv4", linestyle = style)
+            else:
+                ax2.plot(serials_ipv4_worst[j], best_times, label = j + "-ipv4")
+            for tick in ax2.get_xticklabels():
+                tick.set_rotation(90)
+
+            myFmt = mdates.DateFormatter('%H:%M:%S')
+            ax2.yaxis.set_major_formatter(myFmt)
+
+            ax2.set_ylabel('Time')
+            ax2.set_xlabel('Serial')
+            ax2.set_title(n + " ipv4" + " (Best Case)")
+            
+            # ax2.legend()
+            # ax2.tight_layout()
+
+        # fig.tight_layout()
+        # fig.xticks(rotation=90)
+        
+        # plt.subplots_adjust(left=0.50, bottom=None, right=None, top=None, wspace=None, hspace=None)
+        plt.tight_layout()
+        plt.legend(bbox_to_anchor=(-1.68, 0.25))
+        plt.show()
+        
+
+
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        counter = 0
+        for j in servers:
+            temp_x = []
+            for k in serials_ipv6_worst[j]:
+                temp_x.append(int(k))
+            temp_x.sort()
+
+            serials_ipv6_worst[j] = []
+            for k in temp_x:
+                serials_ipv6_worst[j].append(str(k))
+
+            # ax1.plot(serials_ipv6_worst[j], time_list_by_server_v6_worst[j], label = j + "-ipv6")
+            # ax2.plot(serials_ipv6_best[j], time_list_by_server_v6_best[j], label = j + "-ipv6")
+
+            worst_times = seconds_to_timestamps(time_list_by_server_v6_worst[j])
+            counter += 1
+
+            if counter > 10:
+                ax1.plot(serials_ipv6_worst[j], worst_times, label = j + "-ipv6", linestyle = style)
+            else:
+                ax1.plot(serials_ipv6_worst[j], worst_times, label = j + "-ipv6")
+
+            for tick in ax1.get_xticklabels():
+                tick.set_rotation(90)
+
+            myFmt = mdates.DateFormatter('%H:%M:%S')
+            ax1.yaxis.set_major_formatter(myFmt)
+
+            ax1.set_ylabel('Time')
+            ax1.set_xlabel('Serial')
+            ax1.set_title(n + " ipv6" + " (Worst Case)")
+
+
+            best_times = seconds_to_timestamps(time_list_by_server_v6_best[j])
+
+            if counter > 10:
+                ax2.plot(serials_ipv6_best[j], best_times, label = j + "-ipv6", linestyle = style)
+            else:
+                ax2.plot(serials_ipv6_best[j], best_times, label = j + "-ipv6")
+
+            for tick in ax2.get_xticklabels():
+                tick.set_rotation(90)
+
+            myFmt = mdates.DateFormatter('%H:%M:%S')
+            ax2.yaxis.set_major_formatter(myFmt)
+
+            ax2.set_ylabel('Time')
+            ax2.set_xlabel('Serial')
+            ax2.set_title(n + " ipv6" + " (Best Case)")
+
+        plt.tight_layout()
+        plt.legend(bbox_to_anchor=(-1.68, 0.25))
+        plt.show()
+
+
+def graph_lag(data):
+    all_deltas = {}
+    all_names = {}
+    all_nodes = {}
+    all_servers = {}
+
+    for key in data:
+        datapoints = data[key] # key is node
+
+        names = []
+        time_stamps = []
+        deltas = []
+        nodes = []
+        servers = []
+
+        # add percentiles by ipv
+        ipv4_deltas = []
+        ipv6_deltas = []
+
+        nodes.append(key)
+
+        first_in_order_seconds = datapoints[0][1].seconds
+
+        for val in datapoints:
+            
+            name = val[1].node + "-" + val[1].server + "-" + str(val[1].ipv)
+            names.append(name)
+            time_stamps.append(val[1].timestamp.get_time())
+            servers.append(val[1].server)
+            # deltas.append(val[1])
+
+            if val[1].ipv == 4:
+                ipv4_deltas.append(val[1].seconds - first_in_order_seconds)
+            elif val[1].ipv == 6:
+                ipv6_deltas.append(val[1].seconds - first_in_order_seconds)
+
+            deltas.append(val[1].seconds - first_in_order_seconds)
+        
+        all_deltas[key] = deltas
+        all_names[key] = names
+        all_nodes[key] = nodes
+        all_servers[key] = nodes
+
+
+    return all_deltas, all_names, all_nodes, all_servers
 
 
 
@@ -493,11 +674,18 @@ def process(serial_num):
     # focus on flexibility of data points to use in spreads
 
     # get the rows by serial number (dictionary set up)
-    organized = organize_data(serial_num)
+    organized_worst = organize_data_worst(serial_num)
+    organized_best = organize_data_best(serial_num)
 
-    sorted = sort_data(organized)
+    sorted_worst = sort_data(organized_worst)
+    sorted_best = sort_data(organized_best)
 
-    print_spread(sorted)
+    nodes, data_by_nodes_worst, servers = pre_print_spread(sorted_worst)
+    nodes, data_by_nodes_best, servers = pre_print_spread(sorted_best)
+
+    all_deltas, all_names, all_nodes, all_servers = graph_lag(data_by_nodes_worst)
+
+    create_graphs(nodes, data_by_nodes_worst, data_by_nodes_best, servers)
     
     
 def main(argv):
