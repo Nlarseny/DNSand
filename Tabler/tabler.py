@@ -1080,10 +1080,10 @@ def create_bar_chart(serials, overall_one, overall_two, overall_three, title):
 
     width = 0.25
 
-    plt.bar(ind, overall_one, width, label='Within 60')
+    plt.bar(ind, overall_one, width, label='Update within 60 seconds')
     plt.bar(ind + width, overall_two, width,
-        label='Within 300')
-    plt.bar(ind + width + width, overall_three, width, label='Within 3600')
+        label='Update within 300 seconds')
+    plt.bar(ind + width + width, overall_three, width, label='Update within 3600 seconds')
 
     plt.ylabel('Fraction')
     plt.title(title)
@@ -1091,7 +1091,7 @@ def create_bar_chart(serials, overall_one, overall_two, overall_three, title):
     plt.xticks(ind + width / 3, serials)
     plt.xticks(rotation = 90)
     plt.tight_layout()
-    # plt.legend(loc='best')
+    plt.legend(loc='lower right')
     plt.show()
 
 # can be used to get specific info from a node
