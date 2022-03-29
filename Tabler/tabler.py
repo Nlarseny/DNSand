@@ -1074,13 +1074,46 @@ def graph_lag(data):
     return all_deltas, all_names, all_nodes, all_servers, all_ipv, all_serials
 
 
-def spread_analysis(data):
-    # get a week worth of data
-    # get keys, get 20 of them or so
-    all_serials = list(data.keys())
-    serials = all_serials[:20]
+def create_bar_chart(serials, overall_one, overall_two, overall_three, title):
+    N = len(serials)
+    ind = np.arange(N) 
+
+    width = 0.25
+
+    plt.bar(ind, overall_one, width, label='Within 60')
+    plt.bar(ind + width, overall_two, width,
+        label='Within 300')
+    plt.bar(ind + width + width, overall_three, width, label='Within 3600')
+
+    plt.ylabel('Fraction')
+    plt.title(title)
+
+    plt.xticks(ind + width / 3, serials)
+    plt.xticks(rotation = 90)
+    plt.tight_layout()
+    # plt.legend(loc='best')
+    plt.show()
+
+# can be used to get specific info from a node
+def spread_by_node(data, node, serials):
+    less_than_first = {}
+    less_than_second = {}
+    less_than_third = {}
+
+    points_for_node = {}
+
+    overall_results_60 = []
+    overall_results_300 = []
+    overall_results_3600 = []
+
+    print("----", node, "----")
 
     for s in serials:
+        less_than_first[s] = []
+        less_than_second[s] = []
+        less_than_third[s] = []
+        points_for_node[s] = []
+
         deltas = []
         first_in_order_seconds = data[s][0].seconds
 
@@ -1090,12 +1123,89 @@ def spread_analysis(data):
 
         # now we need to start with the stats (n with delta < 60 for example)
         for x in data[s]:
+            if x.node == node:
+                points_for_node[s].append(x)
+            if x.delta <= 60 and x.node == node:
+                less_than_first[s].append(x)
+            if x.delta <= 300 and x.node == node:
+                less_than_second[s].append(x)
+            if x.delta <= 3600 and x.node == node:
+                less_than_third[s].append(x)
+
+        
+        print("serial:", s)
+        print("less than 60:", len(less_than_first[s]), "/", len(points_for_node[s]), len(less_than_first[s]) / len(points_for_node[s]))
+        print("less than 500:", len(less_than_second[s]), "/", len(points_for_node[s]), len(less_than_second[s]) / len(points_for_node[s]))
+        print("less than 3600:", len(less_than_third[s]), "/", len(points_for_node[s]), len(less_than_third[s]) / len(points_for_node[s]))
+        print()
+
+        overall_results_60.append(len(less_than_first[s]) / len(points_for_node[s]))
+        overall_results_300.append(len(less_than_second[s]) / len(points_for_node[s]))
+        overall_results_3600.append(len(less_than_third[s]) / len(points_for_node[s]))
+
+    create_bar_chart(serials, overall_results_60, overall_results_300, overall_results_3600, node)      
+
+
+def spread_analysis(data, nodes):
+    start = 2022022500
+    stop = 2022030400
+
+    print("START OF ANALYSIS")
+    print("FROM:", start, "TO:", stop)
+
+    all_serials = list(data.keys())
+
+    serials = []
+    for i in all_serials:
+        if int(i) >= start and int(i) <= stop:
+            serials.append(i)
+
+    less_than_first = {}
+    less_than_second = {}
+    less_than_third = {}
+
+    overall_results_60 = []
+    overall_results_300 = []
+    overall_results_3600 = []
+
+    for s in serials:
+        less_than_first[s] = []
+        less_than_second[s] = []
+        less_than_third[s] = []
+
+        deltas = []
+        first_in_order_seconds = data[s][0].seconds
+
+        for x in data[s]:
+            deltas.append(x.seconds - first_in_order_seconds)
             x.delta = x.seconds - first_in_order_seconds
 
-    
+        # now we need to start with the stats (n with delta < 60 for example)
+        for x in data[s]:
+            if x.delta <= 60:
+                less_than_first[s].append(x)
+            if x.delta <= 300:
+                less_than_second[s].append(x)
+            if x.delta <= 3600:
+                less_than_third[s].append(x)
 
+        # this is overall
+        print("---------------")
+        print("serial:", s)
+        print("less than 60:", len(less_than_first[s]), "/", len(data[s]), len(less_than_first[s]) / len(data[s]))
+        print("less than 500:", len(less_than_second[s]), "/", len(data[s]), len(less_than_second[s]) / len(data[s]))
+        print("less than 3600:", len(less_than_third[s]), "/", len(data[s]), len(less_than_third[s]) / len(data[s]))
+        print()
 
+        overall_results_60.append(len(less_than_first[s]) / len(data[s]))
+        overall_results_300.append(len(less_than_second[s]) / len(data[s]))
+        overall_results_3600.append(len(less_than_third[s]) / len(data[s]))
 
+    # graph results in matplotlib; needs serials, overalls
+    create_bar_chart(serials, overall_results_60, overall_results_300, overall_results_3600, "Overall")
+
+    for n in nodes:
+        spread_by_node(data, n, serials)
 
 
 
@@ -1110,12 +1220,11 @@ def process(serial_num):
     sorted_worst = sort_data(organized_worst)
     sorted_best = sort_data(organized_best)
 
-    # user sorted_worst/best for the model
-    spread_analysis(sorted_worst)
-
-
     nodes, data_by_nodes_worst, servers, data_by_servers_worst = pre_print_spread(sorted_worst)
     nodes, data_by_nodes_best, servers, data_by_servers_best = pre_print_spread(sorted_best)
+
+    # user sorted_worst/best for the model
+    spread_analysis(sorted_worst, nodes)
 
     all_deltas, all_names, all_nodes, all_servers, all_ipv, all_serials = graph_lag(sorted_worst)
     all_deltas_best, all_names_best, all_nodes_best, all_servers_best, all_ipv_best, all_serials_best = graph_lag(sorted_best)
