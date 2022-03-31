@@ -12,6 +12,9 @@ import pandas as pd
 server_translation = {"WIDE" : "m", "verisign(a)" : "a", "USC" : "b", "ISC" : "f", "NASA" : "e", "UM" : "d",
 "Netnod" : "i", "RIPE" : "k", "Army" : "h", "CogentCom" : "c", "US_DD(NIC)" : "g", "verisign(j)" : "j", "ICANN" : "l"}
 
+server_translation_reversed = {"m" : "WIDE", "a" : "verisign(a)", "b" : "USC", "f" : "ISC", "e" : "NASA", "d" : "UM",
+"i" : "Netnod", "k" : "RIPE", "h" : "Army", "c" : "CogentCom", "g" : "US_DD(NIC)", "j" : "verisign(j)", "l" : "ICANN"}
+
 
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
@@ -1105,7 +1108,7 @@ def create_bar_chart(serials, overall_a, overall_b, overall_c, overall_one, over
     plt.bar(ind, array_60, width, label='Update within 60 seconds', bottom=np.array(overall_a)+np.array(array_40)+np.array(array_50))
     plt.bar(ind, array_300, width,label='Update within 300 seconds', bottom=np.array(overall_a)+np.array(array_40)+np.array(array_50)+np.array(array_60))
     plt.bar(ind, array_3600, width, label='Update within 3600 seconds', bottom=np.array(overall_a)+np.array(array_40)+np.array(array_50)+np.array(array_60)+np.array(array_300))
-    plt.bar(ind, array_18000, width, label='Update within 3600 seconds', bottom=np.array(overall_a)+np.array(array_40)+np.array(array_50)+np.array(array_60)+np.array(array_300)+np.array(array_3600))
+    plt.bar(ind, array_18000, width, label='Update within 18000 seconds', bottom=np.array(overall_a)+np.array(array_40)+np.array(array_50)+np.array(array_60)+np.array(array_300)+np.array(array_3600))
     
 
     plt.ylabel('Fraction')
@@ -1189,10 +1192,12 @@ def spread_by_node(data, node, serials):
         overall_results_60.append(len(less_than_first[s]) / len(points_for_node[s]))
         overall_results_300.append(len(less_than_second[s]) / len(points_for_node[s]))
         overall_results_3600.append(len(less_than_third[s]) / len(points_for_node[s]))
-        overall_results_3600.append(len(less_than_fourth[s]) / len(points_for_node[s]))
+        overall_results_18000.append(len(less_than_fourth[s]) / len(points_for_node[s]))
+
+    title = "Node: " + node
 
     create_bar_chart(serials, overall_results_30, overall_results_40, overall_results_50,
-     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, node)      
+     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, title)      
 
 
 def spread_by_server(data, server, serials):
@@ -1267,7 +1272,7 @@ def spread_by_server(data, server, serials):
         overall_results_3600.append(len(less_than_third[s]) / len(points_for_server[s]))
         overall_results_18000.append(len(less_than_fourth[s]) / len(points_for_server[s]))
 
-    title = "Server: " + server_translation[server]
+    title = "Root Server: " + server_translation[server]
 
     create_bar_chart(serials, overall_results_30, overall_results_40, overall_results_50,
      overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, title)      
@@ -1290,6 +1295,7 @@ def spread_analysis(data, nodes):
     less_than_first = {}
     less_than_second = {}
     less_than_third = {}
+    less_than_fourth = {}
     less_than_a = {}
     less_than_b = {}
     less_than_c = {}
@@ -1301,6 +1307,7 @@ def spread_analysis(data, nodes):
     overall_results_60 = []
     overall_results_300 = []
     overall_results_3600 = []
+    overall_results_18000 = []
 
     for s in serials:
         less_than_a[s] = []
@@ -1309,6 +1316,7 @@ def spread_analysis(data, nodes):
         less_than_first[s] = []
         less_than_second[s] = []
         less_than_third[s] = []
+        less_than_fourth[s] = []
 
         deltas = []
         first_in_order_seconds = data[s][0].seconds
@@ -1331,6 +1339,8 @@ def spread_analysis(data, nodes):
                 less_than_second[s].append(x)
             if x.delta <= 3600:
                 less_than_third[s].append(x)
+            if x.delta <= 18000:
+                less_than_fourth[s].append(x)
 
         # this is overall
         print("---------------")
@@ -1346,10 +1356,11 @@ def spread_analysis(data, nodes):
         overall_results_60.append(len(less_than_first[s]) / len(data[s]))
         overall_results_300.append(len(less_than_second[s]) / len(data[s]))
         overall_results_3600.append(len(less_than_third[s]) / len(data[s]))
+        overall_results_18000.append(len(less_than_fourth[s]) / len(data[s]))
 
     # graph results in matplotlib; needs serials, overalls
     create_bar_chart(serials, overall_results_30, overall_results_40, overall_results_50,
-     overall_results_60, overall_results_300, overall_results_3600, "Overall")
+     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, "Overall by Nodes")
 
     for n in nodes:
         spread_by_node(data, n, serials)
@@ -1430,10 +1441,101 @@ def spread_analysis_servers(data, servers):
 
     # graph results in matplotlib; needs serials, overalls
     create_bar_chart(serials, overall_results_30, overall_results_40, overall_results_50,
-     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, "Overall")
+     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, "Overall By Servers")
 
     for s in servers:
         spread_by_server(data, s, serials)
+
+
+def spread_by_node_and_server(data, node, server, serials):
+    less_than_a = {}
+    less_than_b = {}
+    less_than_c = {}
+    less_than_first = {}
+    less_than_second = {}
+    less_than_third = {}
+    less_than_fourth = {}
+
+    points_for_node = {}
+
+    overall_results_30 = [] # a
+    overall_results_40 = [] # b
+    overall_results_50 = [] # c
+    overall_results_60 = [] # 1
+    overall_results_300 = [] # 2
+    overall_results_3600 = [] # 3
+    overall_results_18000 = [] # 4
+
+    # print("----", node, "----")
+
+    for s in serials:
+        less_than_a[s] = []
+        less_than_b[s] = []
+        less_than_c[s] = []
+        less_than_first[s] = []
+        less_than_second[s] = []
+        less_than_third[s] = []
+        less_than_fourth[s] = []
+        points_for_node[s] = []
+
+        deltas = []
+        first_in_order_seconds = data[s][0].seconds
+
+        for x in data[s]:
+            deltas.append(x.seconds - first_in_order_seconds)
+            x.delta = x.seconds - first_in_order_seconds
+
+        # now we need to start with the stats (n with delta < 60 for example)
+        for x in data[s]:
+            if x.node == node and x.server == server:
+                points_for_node[s].append(x)
+            if x.delta <= 30 and x.node == node and x.server == server:
+                less_than_a[s].append(x)
+            if x.delta <= 40 and x.node == node and x.server == server:
+                less_than_b[s].append(x)
+            if x.delta <= 50 and x.node == node and x.server == server:
+                less_than_c[s].append(x)
+            if x.delta <= 60 and x.node == node and x.server == server:
+                less_than_first[s].append(x)
+            if x.delta <= 300 and x.node == node and x.server == server:
+                less_than_second[s].append(x)
+            if x.delta <= 3600 and x.node == node and x.server == server:
+                less_than_third[s].append(x)
+            if x.delta <= 18000 and x.node == node and x.server == server:
+                less_than_fourth[s].append(x)
+
+        start = "Results with node " + node + " and server " + server_translation[server] + " at serial " +str(s)
+        print(start)
+
+        a_seconds = "Percent within 30 seconds %" + str(len(less_than_a[s]) / len(points_for_node[s]) * 100)
+        b_seconds = "Percent within 40 seconds %" + str(len(less_than_b[s]) / len(points_for_node[s]) * 100)
+        c_seconds = "Percent within 50 seconds %" + str(len(less_than_c[s]) / len(points_for_node[s]) * 100)
+        first_seconds = "Percent within 60 seconds %" + str(len(less_than_first[s]) / len(points_for_node[s]) * 100)
+        second_seconds = "Percent within 300 seconds %" + str(len(less_than_second[s]) / len(points_for_node[s]) * 100)
+        third_seconds = "Percent within 3600 seconds %" + str(len(less_than_third[s]) / len(points_for_node[s]) * 100)
+        fourth_seconds = "Percent within 18000 seconds %" + str(len(less_than_fourth[s]) / len(points_for_node[s]) * 100)
+
+        print(a_seconds)
+        print(b_seconds)
+        print(c_seconds)
+        print(first_seconds)
+        print(second_seconds)
+        print(third_seconds)
+        print(fourth_seconds)
+
+        overall_results_30.append(len(less_than_a[s]) / len(points_for_node[s]))
+        overall_results_40.append(len(less_than_b[s]) / len(points_for_node[s]))
+        overall_results_50.append(len(less_than_c[s]) / len(points_for_node[s]))
+        overall_results_60.append(len(less_than_first[s]) / len(points_for_node[s]))
+        overall_results_300.append(len(less_than_second[s]) / len(points_for_node[s]))
+        overall_results_3600.append(len(less_than_third[s]) / len(points_for_node[s]))
+        overall_results_18000.append(len(less_than_fourth[s]) / len(points_for_node[s]))
+
+    start = "Results with node " + node + " and server " + server_translation[server]
+    create_bar_chart(serials, overall_results_30, overall_results_40, overall_results_50,
+     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, start)   
+  
+
 
 
 def process(serial_num):
@@ -1451,8 +1553,9 @@ def process(serial_num):
     nodes, data_by_nodes_best, servers, data_by_servers_best = pre_print_spread(sorted_best)
 
     # user sorted_worst/best for the model
-    spread_analysis_servers(sorted_worst, servers)
-    spread_analysis(sorted_worst, nodes)
+    # spread_analysis_servers(sorted_worst, servers)
+    # spread_analysis(sorted_worst, nodes)
+    spread_by_node_and_server(sorted_worst, "san-us", server_translation_reversed["a"], list(sorted_worst.keys()))
     
 
     all_deltas, all_names, all_nodes, all_servers, all_ipv, all_serials = graph_lag(sorted_worst)
