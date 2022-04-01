@@ -9,6 +9,7 @@ from datetime import time
 import matplotlib.dates as mdates
 import pandas as pd
 
+
 server_translation = {"WIDE" : "m", "verisign(a)" : "a", "USC" : "b", "ISC" : "f", "NASA" : "e", "UM" : "d",
 "Netnod" : "i", "RIPE" : "k", "Army" : "h", "CogentCom" : "c", "US_DD(NIC)" : "g", "verisign(j)" : "j", "ICANN" : "l"}
 
@@ -1447,7 +1448,20 @@ def spread_analysis_servers(data, servers):
         spread_by_server(data, s, serials)
 
 
-def spread_by_node_and_server(data, node, server, serials):
+def spread_by_node_and_server(data, node, server):
+    start = 2022022500
+    stop = 2022030400
+
+    print("START OF ANALYSIS")
+    print("FROM:", start, "TO:", stop)
+
+    all_serials = list(data.keys())
+
+    serials = []
+    for i in all_serials:
+        if int(i) >= start and int(i) <= stop:
+            serials.append(i)
+
     less_than_a = {}
     less_than_b = {}
     less_than_c = {}
@@ -1555,7 +1569,7 @@ def process(serial_num):
     # user sorted_worst/best for the model
     # spread_analysis_servers(sorted_worst, servers)
     # spread_analysis(sorted_worst, nodes)
-    spread_by_node_and_server(sorted_worst, "san-us", server_translation_reversed["a"], list(sorted_worst.keys()))
+    spread_by_node_and_server(sorted_worst, "san-us", server_translation_reversed["a"])
     
 
     all_deltas, all_names, all_nodes, all_servers, all_ipv, all_serials = graph_lag(sorted_worst)
@@ -1569,11 +1583,12 @@ def process(serial_num):
     data_serials = (all_serials, all_serials_best)
 
     # graph by server instead of node
-    create_graphs_by_server(nodes, data_by_nodes_worst, data_by_nodes_best, servers, data_deltas, data_names, 
-    data_nodes, data_servers, data_ipvs, data_serials, data_by_servers_worst, data_by_servers_best)
+    # create_graphs_by_server(nodes, data_by_nodes_worst, data_by_nodes_best, servers, data_deltas, data_names, 
+    # data_nodes, data_servers, data_ipvs, data_serials, data_by_servers_worst, data_by_servers_best)
 
-    # create_graphs(nodes, data_by_nodes_worst, data_by_nodes_best, servers, data_deltas, data_names, 
-    # data_nodes, data_servers, data_ipvs, data_serials)
+    # graph by node
+    create_graphs(nodes, data_by_nodes_worst, data_by_nodes_best, servers, data_deltas, data_names, 
+    data_nodes, data_servers, data_ipvs, data_serials)
     
     
 def main(argv):
