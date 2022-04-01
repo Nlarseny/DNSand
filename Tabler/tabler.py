@@ -1122,6 +1122,97 @@ def create_bar_chart(serials, overall_a, overall_b, overall_c, overall_one, over
     plt.show()
 
 
+def spread_overall(data):
+    start = 2022022500
+    stop = 2022030400
+
+    print("START OF ANALYSIS")
+    print("FROM:", start, "TO:", stop)
+
+    all_serials = list(data.keys())
+
+    serials = []
+    for i in all_serials:
+        if int(i) >= start and int(i) <= stop:
+            serials.append(i)
+
+    less_than_a = {}
+    less_than_b = {}
+    less_than_c = {}
+    less_than_first = {}
+    less_than_second = {}
+    less_than_third = {}
+    less_than_fourth = {}
+
+    points_for_node = {}
+
+    overall_results_30 = [] # a
+    overall_results_40 = [] # b
+    overall_results_50 = [] # c
+    overall_results_60 = [] # 1
+    overall_results_300 = [] # 2
+    overall_results_3600 = [] # 3
+    overall_results_18000 = [] # 4
+
+
+    for s in serials:
+        less_than_a[s] = []
+        less_than_b[s] = []
+        less_than_c[s] = []
+        less_than_first[s] = []
+        less_than_second[s] = []
+        less_than_third[s] = []
+        less_than_fourth[s] = []
+        points_for_node[s] = []
+
+        deltas = []
+        first_in_order_seconds = data[s][0].seconds
+
+        for x in data[s]:
+            deltas.append(x.seconds - first_in_order_seconds)
+            x.delta = x.seconds - first_in_order_seconds
+
+        # now we need to start with the stats (n with delta < 60 for example)
+        for x in data[s]:
+            if True:
+                points_for_node[s].append(x)
+            if x.delta <= 30:
+                less_than_a[s].append(x)
+            if x.delta <= 40:
+                less_than_b[s].append(x)
+            if x.delta <= 50:
+                less_than_c[s].append(x)
+            if x.delta <= 60:
+                less_than_first[s].append(x)
+            if x.delta <= 300:
+                less_than_second[s].append(x)
+            if x.delta <= 3600:
+                less_than_third[s].append(x)
+            if x.delta <= 18000:
+                less_than_fourth[s].append(x)
+
+        
+        print("serial:", s)
+        print("less than 60:", len(less_than_first[s]), "/", len(points_for_node[s]), len(less_than_first[s]) / len(points_for_node[s]))
+        print("less than 500:", len(less_than_second[s]), "/", len(points_for_node[s]), len(less_than_second[s]) / len(points_for_node[s]))
+        print("less than 3600:", len(less_than_third[s]), "/", len(points_for_node[s]), len(less_than_third[s]) / len(points_for_node[s]))
+        print()
+
+        overall_results_30.append(len(less_than_a[s]) / len(points_for_node[s]))
+        overall_results_40.append(len(less_than_b[s]) / len(points_for_node[s]))
+        overall_results_50.append(len(less_than_c[s]) / len(points_for_node[s]))
+        overall_results_60.append(len(less_than_first[s]) / len(points_for_node[s]))
+        overall_results_300.append(len(less_than_second[s]) / len(points_for_node[s]))
+        overall_results_3600.append(len(less_than_third[s]) / len(points_for_node[s]))
+        overall_results_18000.append(len(less_than_fourth[s]) / len(points_for_node[s]))
+
+    title = "Overall Agnostic"
+
+    create_bar_chart(serials, overall_results_30, overall_results_40, overall_results_50,
+     overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, title)      
+
+
+
 # can be used to get specific info from a node
 def spread_by_node(data, node, serials):
     less_than_a = {}
@@ -1552,6 +1643,7 @@ def spread_by_node_and_server(data, node, server):
 
 
 
+
 def process(serial_num):
     # we don't really need a neat n x m table
     # focus on flexibility of data points to use in spreads
@@ -1565,6 +1657,9 @@ def process(serial_num):
 
     nodes, data_by_nodes_worst, servers, data_by_servers_worst = pre_print_spread(sorted_worst)
     nodes, data_by_nodes_best, servers, data_by_servers_best = pre_print_spread(sorted_best)
+
+    # Overall
+    spread_overall(sorted_worst)
 
     # user sorted_worst/best for the model
     # spread_analysis_servers(sorted_worst, servers)
