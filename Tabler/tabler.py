@@ -2,7 +2,6 @@ import sys
 import glob
 from csv import writer
 import numpy as np
-import copy
 import matplotlib.pyplot as plt
 import datetime
 from datetime import time
@@ -1900,6 +1899,137 @@ def one_bar_spread_by_server(data, servers):
     plt.show()
 
 
+def one_bar_spread_overall(data, servers):
+    # nodes are x axis, y axis is the percentages
+    start = 2022022500
+    stop = 2022030400
+
+    # do we need to have dicts for 
+    final_results_30 = {} # a
+    final_results_40 = {} # b
+    final_results_50 = {} # c
+    final_results_60 = {}
+    final_results_300 = {}
+    final_results_3600 = {}
+    final_results_18000 = {}    
+
+    for n in servers:
+        print("START OF ANALYSIS")
+        print("FROM:", start, "TO:", stop)
+
+        all_serials = list(data.keys())
+
+        serials = []
+        for i in all_serials:
+            if int(i) >= start and int(i) <= stop:
+                serials.append(i)
+
+        less_than_first = {}
+        less_than_second = {}
+        less_than_third = {}
+        less_than_fourth = {}
+        less_than_a = {}
+        less_than_b = {}
+        less_than_c = {}
+
+
+        overall_results_30 = [] # a
+        overall_results_40 = [] # b
+        overall_results_50 = [] # c
+        overall_results_60 = []
+        overall_results_300 = []
+        overall_results_3600 = []
+        overall_results_18000 = []
+
+        for s in serials:
+            all_with_server = []
+
+            less_than_a[s] = []
+            less_than_b[s] = []
+            less_than_c[s] = []
+            less_than_first[s] = []
+            less_than_second[s] = []
+            less_than_third[s] = []
+            less_than_fourth[s] = []
+
+            deltas = []
+            first_in_order_seconds = data[s][0].seconds
+
+            for x in data[s]:
+                deltas.append(x.seconds - first_in_order_seconds)
+                x.delta = x.seconds - first_in_order_seconds
+
+            # now we need to start with the stats (n with delta < 60 for example)
+            for x in data[s]:
+                if True:
+                    all_with_server.append(x.delta)
+                if x.delta <= 30:
+                    less_than_a[s].append(x)
+                if x.delta <= 40:
+                    less_than_b[s].append(x)
+                if x.delta <= 50:
+                    less_than_c[s].append(x)
+                if x.delta <= 60:
+                    less_than_first[s].append(x)
+                if x.delta <= 300:
+                    less_than_second[s].append(x)
+                if x.delta <= 3600:
+                    less_than_third[s].append(x)
+                if x.delta <= 18000:
+                    less_than_fourth[s].append(x)
+
+
+            overall_results_30.append(len(less_than_a[s]) / len(all_with_server))
+            overall_results_40.append(len(less_than_b[s]) / len(all_with_server))
+            overall_results_50.append(len(less_than_c[s]) / len(all_with_server))
+            overall_results_60.append(len(less_than_first[s]) / len(all_with_server))
+            overall_results_300.append(len(less_than_second[s]) / len(all_with_server))
+            overall_results_3600.append(len(less_than_third[s]) / len(all_with_server))
+            overall_results_18000.append(len(less_than_fourth[s]) / len(all_with_server))
+
+        final_results_30[n] = average_list(overall_results_30)
+        final_results_40[n] = average_list(overall_results_40) 
+        final_results_50[n] = average_list(overall_results_50)
+        final_results_60[n] = average_list(overall_results_60)
+        final_results_300[n] = average_list(overall_results_300)
+        final_results_3600[n] = average_list(overall_results_3600)
+        final_results_18000[n] = average_list(overall_results_18000)
+
+
+    all_30s = list(final_results_30.values())
+    all_40s = subtract_array(list(final_results_30.values()), list(final_results_40.values()))
+    all_50s = subtract_array(list(final_results_40.values()), list(final_results_50.values()))
+    all_60s = subtract_array(list(final_results_50.values()), list(final_results_60.values()))
+    all_300s = subtract_array(list(final_results_60.values()), list(final_results_300.values()))
+    all_3600s = subtract_array(list(final_results_300.values()), list(final_results_3600.values()))
+    all_18000s = subtract_array(list(final_results_3600.values()), list(final_results_18000.values()))
+
+    # overall_averages = [all_30s[0], all_40s[0], all_50s[0], all_60s[0], all_300s[0], all_3600s[0], all_18000s[0]]
+
+    overall = ["overall"]
+
+    plt.bar(overall, all_30s[0:1], width=0.25)
+    plt.bar(overall, all_40s[0:1], bottom = all_30s[0:1], width=0.25)
+    plt.bar(overall, all_50s[0:1], bottom = np.array(all_30s[0:1])+np.array(all_40s[0:1]), width=0.25)
+    plt.bar(overall, all_60s[0:1], bottom = np.array(all_30s[0:1])+np.array(all_40s[0:1])+np.array(all_50s[0:1]), width=0.25)
+    plt.bar(overall, all_300s[0:1], bottom = np.array(all_30s[0:1])+np.array(all_40s[0:1])+np.array(all_50s[0:1])+np.array(all_60s[0:1]), width=0.25)
+    plt.bar(overall, all_3600s[0:1], bottom = np.array(all_30s[0:1])+np.array(all_40s[0:1])+np.array(all_50s[0:1])+np.array(all_60s[0:1])+np.array(all_300s[0:1]), width=0.25)
+    plt.bar(overall, all_18000s[0:1], bottom = np.array(all_30s[0:1])+np.array(all_40s[0:1])+np.array(all_50s[0:1])+np.array(all_60s[0:1])+np.array(all_300s[0:1])+np.array(all_3600s[0:1]), width=0.25)
+
+    plt.ylabel('Fraction')
+    plt.title("Chance Overall")
+
+    plt.xticks(np.arange(len(overall)), overall)
+    plt.xticks(rotation = 90)
+    plt.tight_layout()
+
+    # handles, labels = plt.gca().get_legend_handles_labels()
+    # by_label = dict(zip(labels, handles))
+    # plt.legend(by_label.values(), by_label.keys())
+    labels = ["Within 30 seconds", "Within 40 seconds", "Within 50 seconds", "Within 60 seconds", "Within 300 seconds", "Within 3600 seconds", "Within 18000 seconds"]
+    plt.legend(labels, loc='lower right')
+    plt.show()
+
 
 def process(serial_num):
     # we don't really need a neat n x m table
@@ -1923,7 +2053,9 @@ def process(serial_num):
     # spread_analysis(sorted_worst, nodes)
     # spread_by_node_and_server(sorted_worst, "san-us", server_translation_reversed["a"])
 
-    one_bar_spread_by_node(sorted_worst, nodes)
+    one_bar_spread_overall(sorted_worst, nodes)
+
+    # one_bar_spread_by_node(sorted_best, nodes)
 
     # one_bar_spread_by_server(sorted_worst, servers)
     
