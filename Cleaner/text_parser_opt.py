@@ -2,6 +2,7 @@ import sys
 import glob
 
 
+# Get all filenames in the folders
 def get_filenames():
     all_files = glob.glob('./**/**/*.txt', 
                    recursive = False)
@@ -9,12 +10,12 @@ def get_filenames():
     return all_files
 
 
+# parses the files line by line to clean out the file
+# the argument is the baseline, or in otherwords the earliest you want the serial to be
 def parse_file(baseline):
     text_files = get_filenames()
 
     for f in text_files:
-        no_doubles = {}
-
         file = open(f, "r")
         lines = file.readlines()
         file.close()
@@ -31,6 +32,8 @@ def parse_file(baseline):
                 write_obj.write(lines_to_write[key])
         
 
+# Optimistic version of the cleaner
+# the argument is the baseline, or in otherwords the earliest you want the serial to be
 def main(argv):
     baseline = 2022022500
     parse_file(baseline)
