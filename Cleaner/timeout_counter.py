@@ -1,25 +1,16 @@
 import sys
 import glob
-from csv import writer
-import numpy as np
-import copy
 
 
-
-
-
-
-
-
+# Returns list with all files from all the folders
 def get_filenames():
-    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
-
     all_files = glob.glob('./**/*.txt', 
                    recursive = True)
 
     return all_files
 
 
+# check if string is in the file
 def check_if_string_in_file(file_name, string_to_search):
     iter = 0
     with open(file_name, 'r') as read_obj:
@@ -28,10 +19,9 @@ def check_if_string_in_file(file_name, string_to_search):
                 iter += 1
     return iter
 
-def create_table(serial_num):
-    # list_of_headers = ["SERIALS", "verisign(a)", "USC", "CogentCom",
-    # "UM", "NASA", "ISC", "US DD", "Army", "Netnod", "verisign(j)", "RIPE", "ICANN", "WIDE"]
 
+# prints the table of results
+def create_table():
     list_of_headers = {}
     files = get_filenames()
     for file in files:
@@ -41,14 +31,6 @@ def create_table(serial_num):
 
 
     print(list_of_headers)
-
-
-
-
-    
-
-
-
     
 
 def main(argv):
@@ -59,8 +41,5 @@ def main(argv):
     create_table(serial_num)
 
 
-
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-    # root changes seem to consistently be between 22:00 and 23:00, as well as between 10:00 and 11:00 (MST)
