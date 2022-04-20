@@ -24,10 +24,6 @@ find the root that updates the earliest, find what order the servers come in aft
 answer:
 NASA is the slowest, then ICANN, then the rest
 
-1259d771a4143bd7a24683c6b4ae5940ea5ed413
-
-
-
 
 1 Feb 2022
 ark
@@ -53,8 +49,6 @@ git add .
 git commit -m "added new node"
 git pull
 git push
-
-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
 
 
 /usr/local/ark/bin/pip3 install dnspython

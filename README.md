@@ -10,3 +10,7 @@ This folder serves as a way to clean raw data from the Ark nodes. One simply nee
 Tabler:
 This folder contains everything needed to parse cleaned data. It works on a similar principle as the cleaner program does. Once the data has been cleaned by by the selected cleaner file, load it into the correct directory (self explanatory on which goes where). Once the files are loaded you can run tabler.py to organize the data and present it. 
 There are several options for presenting. See the comments in the code to see which functions to uncomment to get desired graphs and then run the program. The csv file is a table version of the data organized to some degree.
+
+
+Defunct:
+Past attempts or programs written that are no longer useful.
