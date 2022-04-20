@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import datetime
 from datetime import time
 import matplotlib.dates as mdates
-import pandas as pd
 
 
+# These dictionaries provide an easy to switch to however you like to name your root servers
 server_translation = {"WIDE" : "m", "verisign(a)" : "a", "USC" : "b", "ISC" : "f", "NASA" : "e", "UM" : "d",
 "Netnod" : "i", "RIPE" : "k", "Army" : "h", "CogentCom" : "c", "US_DD(NIC)" : "g", "verisign(j)" : "j", "ICANN" : "l"}
 
@@ -16,6 +16,7 @@ server_translation_reversed = {"m" : "WIDE", "a" : "verisign(a)", "b" : "USC", "
 "i" : "Netnod", "k" : "RIPE", "h" : "Army", "c" : "CogentCom", "g" : "US_DD(NIC)", "j" : "verisign(j)", "l" : "ICANN"}
 
 
+# Custom class for keep track of the times, simplier than the other options
 class TimeStamps:
     def __init__(self, hour = 0, min = 0, sec = 0):
         self.hour = hour
@@ -34,6 +35,7 @@ class TimeStamps:
         return line
 
 
+# this is the datapoint class, its what I use to keep things a little easier to handle
 class DataPoint:
     def __init__(self, node = 0, server = 0, ipv = 0, iter = 0, seconds = 0, timestamp = 0):
         self.node = node
@@ -45,12 +47,14 @@ class DataPoint:
         self.delta = -1
 
 
+# creates a time stamp with give time
 def create_timestamp(time):
     result = time.split(":")
     final = TimeStamps(int(result[0]), int(result[1]), float(result[2]))
     return final
 
 
+# finds the difference between two TimeStamps
 def deltaTimeStamp(time_a, time_b):
     total_a_seconds = time_a.to_seconds()
     total_b_seconds = time_b.to_seconds()
@@ -59,33 +63,31 @@ def deltaTimeStamp(time_a, time_b):
     return total_b_seconds - total_a_seconds
 
 
+# gets all file names from all the folders
 def get_filenames():
-    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
-
     all_files = glob.glob('./**/*.txt', 
                    recursive = True) # to split into two groups, have two folders, best and worst case scenarios
 
     return all_files
 
 
+# gets all files from the worst_case folder
 def get_worst_filenames():
-    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
-
     all_files = glob.glob('./worst_case/**/*.txt', 
                    recursive = True) # to split into two groups, have two folders, best and worst case scenarios
 
     return all_files
 
 
+# gets all files from the best_case folder
 def get_best_filenames():
-    #file_list = glob.glob("./1test/*.txt") # Include slash or it will search in the wrong directory
-
     all_files = glob.glob('./best_case/**/*.txt', 
                    recursive = True) # to split into two groups, have two folders, best and worst case scenarios
 
     return all_files
 
 
+# parses the file name into useful bits
 def get_file_parse(file):
     ipv = 0
     if "v4" in file:
@@ -103,10 +105,12 @@ def get_file_parse(file):
     return node, server, ipv
 
 
+# averages all items in a list by the length of the list
 def average_list(lister):
     return sum(lister) / len(lister)
 
 
+# returns data organized by serial number in a dictionary (worst case data)
 def organize_data_worst(serial_num):
     files = get_worst_filenames()
 
@@ -143,6 +147,7 @@ def organize_data_worst(serial_num):
     return by_serial
 
 
+# returns data organized by serial number in a dictionary (best case data)
 def organize_data_best(serial_num):
     files = get_best_filenames()
 
@@ -178,6 +183,7 @@ def organize_data_best(serial_num):
     return by_serial
 
 
+# puts the data in order by its seconds attribute (TimeStamp class)
 def sort_data(data):
     for key in data:
         datapoints = data[key]
@@ -188,6 +194,7 @@ def sort_data(data):
     return data
 
 
+# time till the next item on list
 def seconds_to_time(time_list):
     times = []
     for i in time_list:
@@ -196,6 +203,7 @@ def seconds_to_time(time_list):
     return times
 
 
+# organizes and returns nodes, data_by_nodes, servers, and data_by_servers
 def pre_print_spread(data):
     # data[key] contains the sorted spread, now to move it to the excel sheet
     with open('practice.csv', 'a+', newline='') as write_obj:
@@ -424,6 +432,7 @@ def pre_print_spread(data):
     return nodes, data_by_nodes, servers, data_by_servers # serials
 
 
+# converts seconds into our very own TimeStamp objects
 def seconds_to_timestamps(times):
     new_times = []
     for t in times:
@@ -442,6 +451,7 @@ def seconds_to_timestamps(times):
     return new_times
 
 
+# creates the four plot graphs of lag time by serial and time by serial
 def create_graphs(nodes, data_by_nodes_worst, data_by_nodes_best, servers, all_deltas, all_names, 
 all_nodes, all_servers, all_ipv, all_serials):
     # key accessed (node name is the key)
@@ -537,10 +547,7 @@ all_nodes, all_servers, all_ipv, all_serials):
                         lag_list_by_server_v6_best[j].append(all_deltas[1][key][i])
                         lag_serials_ipv6_best[j].append(key) #serials
 
-                    
 
-                    
-        
         # move to new function- needs servers, serials_ipv4/6, time_list_by_server_v4/6
         # the actual plot function needs to take best and worst case for both
 
@@ -641,7 +648,6 @@ all_nodes, all_servers, all_ipv, all_serials):
         plt.show()
         
 
-
         fig, axs = plt.subplots(2, 2)
         counter = 0
         for j in servers:
@@ -735,6 +741,7 @@ all_nodes, all_servers, all_ipv, all_serials):
         plt.show()
 
 
+# creates the four plot graphs of lag time by server and time by server
 def create_graphs_by_server(nodes, data_by_nodes_worstest, data_by_nodes_bestest, servers, all_deltas, all_names, 
 all_nodes, all_servers, all_ipv, all_serials, data_by_servers_worst, data_by_servers_best):
     # for this change, all server <-> node
@@ -779,7 +786,6 @@ all_nodes, all_servers, all_ipv, all_serials, data_by_servers_worst, data_by_ser
                 if j == data_by_servers_best[n][i][1].node and data_by_servers_best[n][i][1].ipv == 6:
                     time_list_by_node_v6_best[j].append(data_by_servers_best[n][i][1].seconds)
                     serials_ipv6_best[j].append(data_by_servers_best[n][i][0])
-
 
         lag_list_by_node_v4_worst = {}
         lag_list_by_node_v6_worst = {}
@@ -828,9 +834,6 @@ all_nodes, all_servers, all_ipv, all_serials, data_by_servers_worst, data_by_ser
                         lag_serials_ipv6_best[j].append(key) #serials
 
                     
-
-                    
-        
         # move to new function- needs servers, serials_ipv4/6, time_list_by_server_v4/6
         # the actual plot function needs to take best and worst case for both
 
@@ -923,14 +926,12 @@ all_nodes, all_servers, all_ipv, all_serials, data_by_servers_worst, data_by_ser
             axs[1, 1].set_title(server_translation[n] + " ipv4" + " (Best Case)")
             # axs.set_xticks(5) #!!!!!!!
             
-
         # axs[1, 0].get_shared_y_axes().join(axs[1, 0], axs[1, 1]) # joins the bottom two's axes
         plt.tight_layout()
         plt.legend(bbox_to_anchor=(-1.68, 0.78))
         # plt.locator_params(axis='x', nbins=5)
         plt.show()
-        
-
+    
 
         fig, axs = plt.subplots(2, 2)
         counter = 0
@@ -1025,6 +1026,7 @@ all_nodes, all_servers, all_ipv, all_serials, data_by_servers_worst, data_by_ser
         plt.show()
 
 
+# organizes data and returns all_deltas, all_names, all_nodes, all_servers, all_ipv, and all_serials
 def graph_lag(data):
     all_deltas = {}
     all_names = {}
@@ -1048,12 +1050,10 @@ def graph_lag(data):
         ipv4_deltas = []
         ipv6_deltas = []
 
-        
-
         first_in_order_seconds = datapoints[0].seconds # we need to get first of each serial
 
         for val in datapoints:
-            
+
             name = val.node + "-" + val.server + "-" + str(val.ipv)
             names.append(name)
             time_stamps.append(val.timestamp.get_time())
@@ -1081,6 +1081,7 @@ def graph_lag(data):
     return all_deltas, all_names, all_nodes, all_servers, all_ipv, all_serials
 
 
+# subtract between two arrays
 def subtract_array(array_a, array_b):
     temp = []
     for i in range(len(array_b)):
@@ -1089,6 +1090,7 @@ def subtract_array(array_a, array_b):
     return temp
 
 
+# creates bar charts by serial
 def create_bar_chart(serials, overall_a, overall_b, overall_c, overall_one, overall_two, overall_three, overall_four, title):
     N = len(serials)
     ind = np.arange(N) 
@@ -1121,6 +1123,7 @@ def create_bar_chart(serials, overall_a, overall_b, overall_c, overall_one, over
     plt.show()
 
 
+# createsone agnostic bar chart
 def spread_overall_with_serials(data):
     start = 2022022500
     stop = 2022030400
@@ -1211,7 +1214,7 @@ def spread_overall_with_serials(data):
      overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, title)      
 
 
-# can be used to get specific info from a node
+# can be used to get specific info from a node, calls create_bar_chart to graph
 def spread_by_node(data, node, serials):
     less_than_a = {}
     less_than_b = {}
@@ -1290,6 +1293,7 @@ def spread_by_node(data, node, serials):
      overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, title)      
 
 
+# can be used to get specific info from a server, calls create_bar_chart to graph
 def spread_by_server(data, server, serials):
     less_than_a = {}
     less_than_b = {}
@@ -1368,6 +1372,8 @@ def spread_by_server(data, server, serials):
      overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, title)      
 
 
+# start and stop variables in the function control what time frame of data is used (serials are dates, so use them as so)
+# performs the spread analysis, or difference between all the datapoints by node
 def spread_analysis(data, nodes):
     start = 2022022500
     stop = 2022030400
@@ -1456,6 +1462,8 @@ def spread_analysis(data, nodes):
         spread_by_node(data, n, serials)
 
 
+# start and stop variables in the function control what time frame of data is used (serials are dates, so use them as so)
+# performs the spread analysis, or difference between all the datapoints by server
 def spread_analysis_servers(data, servers):
     start = 2022022500
     stop = 2022030400
@@ -1537,6 +1545,8 @@ def spread_analysis_servers(data, servers):
         spread_by_server(data, s, serials)
 
 
+# start and stop variables in the function control what time frame of data is used (serials are dates, so use them as so)
+# performs the spread analysis, or difference between all the datapoints by node and server combined
 def spread_by_node_and_server(data, node, server):
     start = 2022022500
     stop = 2022030400
@@ -1639,6 +1649,7 @@ def spread_by_node_and_server(data, node, server):
      overall_results_60, overall_results_300, overall_results_3600, overall_results_18000, start)   
   
 
+# creates a one bar graph that shows percent updated by certain times by node
 def one_bar_spread_by_node(data, nodes):
     # nodes are x axis, y axis is the percentages
     start = 2022022500
@@ -1769,6 +1780,7 @@ def one_bar_spread_by_node(data, nodes):
     plt.show()
 
 
+# creates a one bar graph that shows percent updated by certain times by server
 def one_bar_spread_by_server(data, servers):
     # nodes are x axis, y axis is the percentages
     start = 2022022500
@@ -1899,6 +1911,7 @@ def one_bar_spread_by_server(data, servers):
     plt.show()
 
 
+# creates a one bar graph that shows percent updated by certain times agnostically
 def one_bar_spread_overall(data, servers):
     # nodes are x axis, y axis is the percentages
     start = 2022022500
@@ -2031,10 +2044,8 @@ def one_bar_spread_overall(data, servers):
     plt.show()
 
 
+# this is where the functions to organize data and graph data are called
 def process(serial_num):
-    # we don't really need a neat n x m table
-    # focus on flexibility of data points to use in spreads
-
     # get the rows by serial number (dictionary set up)
     organized_worst = organize_data_worst(serial_num)
     organized_best = organize_data_best(serial_num)
